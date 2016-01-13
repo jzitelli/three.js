@@ -68,7 +68,6 @@ def skeletal_animation(mesh, options):
 
     return animations
 
-
 @_mesh
 def bones(mesh, options):
     """
@@ -343,9 +342,9 @@ def faces(mesh, options, material_list=None):
                     face_data.append(mat_index)
                     break
             else:
-                error = ("Could not map the material index "
+                logger.warning("Could not map the material index "
                          "for face %d" % face.index)
-                raise exceptions.MaterialError(error)
+                face_data.append(0)  # default to index zero if there's a bad material
 
         if uv_indices:
             for index, uv_layer in enumerate(uv_indices):
@@ -431,6 +430,74 @@ def morph_targets(mesh, options):
 
     return manifest
 
+@_mesh
+def blend_shapes(mesh, options):
+    """
+
+    :param mesh:
+    :param options:
+
+    """
+    logger.debug("mesh.blend_shapes(%s, %s)", mesh, options)
+    manifest = []
+    if mesh.shape_keys:
+        logger.info("mesh.blend_shapes -- there's shape keys")
+        key_blocks = mesh.shape_keys.key_blocks
+        for key in key_blocks.keys()[1:]:     # skip "Basis"
+            logger.info("mesh.blend_shapes -- key %s", key)
+            morph = []
+            for d in key_blocks[key].data:
+                co = d.co
+                morph.append([co.x, co.y, co.z])
+            manifest.append({
+                constants.NAME: key,
+                constants.VERTICES: morph
+            })
+    else:
+        logger.debug("No valid blend_shapes detected")
+    return manifest
+
+@_mesh
+def animated_blend_shapes(mesh, name, options):
+    """
+
+    :param mesh:
+    :param options:
+
+    """
+
+    # let filter the name to only keep the node's name
+    # the two cases are '%sGeometry' and '%sGeometry.%d', and we want %s
+    name = re.search("^(.*)Geometry(\..*)?$", name).group(1)
+
+    logger.debug("mesh.animated_blend_shapes(%s, %s)", mesh, options)
+    tracks = []
+    shp = mesh.shape_keys
+    animCurves = shp.animation_data
+    if animCurves:
+        animCurves = animCurves.action.fcurves
+
+    for key in shp.key_blocks.keys()[1:]:    # skip "Basis"
+        key_name = name+".morphTargetInfluences["+key+"]"
+        found_animation = False
+        data_path = 'key_blocks["'+key+'"].value'
+        values = []
+        if animCurves:
+            for fcurve in animCurves:
+                if fcurve.data_path == data_path:
+                    for xx in fcurve.keyframe_points:
+                        values.append({ "time": xx.co.x, "value": xx.co.y })
+                    found_animation = True
+                    break # no need to continue
+
+        if found_animation:
+            tracks.append({
+                constants.NAME: key_name,
+                constants.TYPE: "number",
+                constants.KEYS: values
+            });
+
+    return tracks
 
 @_mesh
 def materials(mesh, options):
@@ -458,6 +525,9 @@ def materials(mesh, options):
     logger.info("Vertex colours set to %s", use_colors)
 
     for mat, index in material_sets:
+        if mat == None:     # undefined material for a specific index is skipped
+            continue
+
         try:
             dbg_color = constants.DBG_COLORS[index]
         except IndexError:
@@ -465,7 +535,6 @@ def materials(mesh, options):
 
         logger.info("Compiling attributes for %s", mat.name)
         attributes = {
-            constants.COLOR_AMBIENT: material.ambient_color(mat),
             constants.COLOR_EMISSIVE: material.emissive_color(mat),
             constants.SHADING: material.shading(mat),
             constants.OPACITY: material.opacity(mat),

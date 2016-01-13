@@ -80,7 +80,7 @@
 				scene.add( light );
 				spotlight = light;
 
-				var planeGeometry = new THREE.PlaneGeometry( 2000, 2000, 20, 20 );
+				var planeGeometry = new THREE.PlaneGeometry( 2000, 2000 );
 				planeGeometry.rotateX( - Math.PI / 2 );
 				var planeMaterial = new THREE.MeshBasicMaterial( { color: 0xeeeeee } );
 
@@ -101,6 +101,7 @@
 
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setClearColor( 0xf0f0f0 );
+				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.shadowMap.enabled = true;
 				container.appendChild( renderer.domElement );

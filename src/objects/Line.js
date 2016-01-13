@@ -35,21 +35,20 @@ THREE.Line.prototype.raycast = ( function () {
 		var precisionSq = precision * precision;
 
 		var geometry = this.geometry;
-
-		if ( geometry.boundingSphere === null ) geometry.computeBoundingSphere();
+		var matrixWorld = this.matrixWorld;
 
 		// Checking boundingSphere distance to ray
 
+		if ( geometry.boundingSphere === null ) geometry.computeBoundingSphere();
+
 		sphere.copy( geometry.boundingSphere );
-		sphere.applyMatrix4( this.matrixWorld );
+		sphere.applyMatrix4( matrixWorld );
 
-		if ( raycaster.ray.isIntersectionSphere( sphere ) === false ) {
+		if ( raycaster.ray.intersectsSphere( sphere ) === false ) return;
 
-			return;
+		//
 
-		}
-
-		inverseMatrix.getInverse( this.matrixWorld );
+		inverseMatrix.getInverse( matrixWorld );
 		ray.copy( raycaster.ray ).applyMatrix4( inverseMatrix );
 
 		var vStart = new THREE.Vector3();
@@ -62,11 +61,11 @@ THREE.Line.prototype.raycast = ( function () {
 
 			var index = geometry.index;
 			var attributes = geometry.attributes;
+			var positions = attributes.position.array;
 
 			if ( index !== null ) {
 
 				var indices = index.array;
-				var positions = attributes.position.array;
 
 				for ( var i = 0, l = indices.length - 1; i < l; i += step ) {
 
@@ -102,8 +101,6 @@ THREE.Line.prototype.raycast = ( function () {
 				}
 
 			} else {
-
-				var positions = attributes.position.array;
 
 				for ( var i = 0, l = positions.length / 3 - 1; i < l; i += step ) {
 
@@ -178,31 +175,6 @@ THREE.Line.prototype.raycast = ( function () {
 THREE.Line.prototype.clone = function () {
 
 	return new this.constructor( this.geometry, this.material ).copy( this );
-
-};
-
-THREE.Line.prototype.toJSON = function ( meta ) {
-
-	var data = THREE.Object3D.prototype.toJSON.call( this, meta );
-
-	// only serialize if not in meta geometries cache
-	if ( meta.geometries[ this.geometry.uuid ] === undefined ) {
-
-		meta.geometries[ this.geometry.uuid ] = this.geometry.toJSON();
-
-	}
-
-	// only serialize if not in meta materials cache
-	if ( meta.materials[ this.material.uuid ] === undefined ) {
-
-		meta.materials[ this.material.uuid ] = this.material.toJSON();
-
-	}
-
-	data.object.geometry = this.geometry.uuid;
-	data.object.material = this.material.uuid;
-
-	return data;
 
 };
 

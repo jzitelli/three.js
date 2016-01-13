@@ -9,13 +9,11 @@
  *
  */
 
-THREE.VREffect = function ( renderer, onError, camera ) {
+THREE.VREffect = function ( renderer, onError ) {
 
 	var vrHMD;
 	var eyeTranslationL, eyeFOVL;
 	var eyeTranslationR, eyeFOVR;
-	var stereoTransformL = new THREE.Matrix4(),
-		stereoTransformR = new THREE.Matrix4();
 
 	function gotVRDevices( devices ) {
 
@@ -24,35 +22,6 @@ THREE.VREffect = function ( renderer, onError, camera ) {
 			if ( devices[ i ] instanceof HMDVRDevice ) {
 
 				vrHMD = devices[ i ];
-
-				if ( vrHMD.getEyeParameters !== undefined ) {
-
-					var eyeParamsL = vrHMD.getEyeParameters( 'left' );
-					var eyeParamsR = vrHMD.getEyeParameters( 'right' );
-
-					eyeTranslationL = eyeParamsL.eyeTranslation;
-					eyeTranslationR = eyeParamsR.eyeTranslation;
-					eyeFOVL = eyeParamsL.recommendedFieldOfView;
-					eyeFOVR = eyeParamsR.recommendedFieldOfView;
-
-				} else {
-
-					// TODO: This is an older code path and not spec compliant.
-					// It should be removed at some point in the near future.
-					eyeTranslationL = vrHMD.getEyeTranslation( 'left' );
-					eyeTranslationR = vrHMD.getEyeTranslation( 'right' );
-					eyeFOVL = vrHMD.getRecommendedEyeFieldOfView( 'left' );
-					eyeFOVR = vrHMD.getRecommendedEyeFieldOfView( 'right' );
-
-				}
-
-				var zNear = camera !== undefined ? camera.near : 0.1;
-				var zFar = camera !== undefined ? camera.far : 1000;
-				cameraL.projectionMatrix.copy( fovToProjection( eyeFOVL, true, zNear, zFar ) );
-				cameraR.projectionMatrix.copy( fovToProjection( eyeFOVR, true, zNear, zFar ) );
-
-				stereoTransformL.makeTranslation( this.scale * eyeTranslationL.x, this.scale * eyeTranslationL.y, this.scale * eyeTranslationL.z );
-				stereoTransformR.makeTranslation( this.scale * eyeTranslationR.x, this.scale * eyeTranslationR.y, this.scale * eyeTranslationR.z );
 
 				break; // We keep the first we encounter
 
@@ -70,7 +39,7 @@ THREE.VREffect = function ( renderer, onError, camera ) {
 
 	if ( navigator.getVRDevices ) {
 
-		navigator.getVRDevices().then( gotVRDevices.bind(this) );
+		navigator.getVRDevices().then( gotVRDevices );
 
 	}
 
@@ -78,7 +47,7 @@ THREE.VREffect = function ( renderer, onError, camera ) {
 
 	this.scale = 1;
 
-	this.setSize = function( width, height ) {
+	this.setSize = function ( width, height ) {
 
 		renderer.setSize( width, height );
 
@@ -117,72 +86,63 @@ THREE.VREffect = function ( renderer, onError, camera ) {
 	// render
 
 	var cameraL = new THREE.PerspectiveCamera();
-	var cameraR = new THREE.PerspectiveCamera();
+	cameraL.layers.enable( 1 );
 
-	cameraL.matrixAutoUpdate = false;
-	cameraR.matrixAutoUpdate = false;
+	var cameraR = new THREE.PerspectiveCamera();
+	cameraR.layers.enable( 2 );
 
 	this.render = function ( scene, camera ) {
 
 		if ( vrHMD ) {
 
-			var sceneL, sceneR;
-			var autoUpdate;
+			var eyeParamsL = vrHMD.getEyeParameters( 'left' );
+			var eyeParamsR = vrHMD.getEyeParameters( 'right' );
+
+			eyeTranslationL = eyeParamsL.eyeTranslation;
+			eyeTranslationR = eyeParamsR.eyeTranslation;
+			eyeFOVL = eyeParamsL.recommendedFieldOfView;
+			eyeFOVR = eyeParamsR.recommendedFieldOfView;
+
 			if ( Array.isArray( scene ) ) {
 
-				sceneL = scene[ 0 ];
-				sceneR = scene[ 1 ];
-
-			} else {
-
-				sceneL = scene;
-				sceneR = scene;
-				autoUpdate = scene.autoUpdate;
-
-				if ( autoUpdate === true ) {
-
-					scene.updateMatrixWorld();
-					scene.autoUpdate = false;
-
-				}
+				console.warn( 'THREE.VREffect.render() no longer supports arrays. Use object.layers instead.' );
+				scene = scene[ 0 ];
 
 			}
 
 			var size = renderer.getSize();
-			size.width /= 2;
 
-			renderer.enableScissorTest( true );
+			renderer.setScissorTest( true );
 			renderer.clear();
 
 			if ( camera.parent === null ) camera.updateMatrixWorld();
 
+			cameraL.projectionMatrix = fovToProjection( eyeFOVL, true, camera.near, camera.far );
+			cameraR.projectionMatrix = fovToProjection( eyeFOVR, true, camera.near, camera.far );
+
+			camera.matrixWorld.decompose( cameraL.position, cameraL.quaternion, cameraL.scale );
+			camera.matrixWorld.decompose( cameraR.position, cameraR.quaternion, cameraR.scale );
+
+			cameraL.translateX( eyeTranslationL.x * this.scale );
+			cameraR.translateX( eyeTranslationR.x * this.scale );
+
 			// render left eye
-			renderer.setViewport( 0, 0, size.width, size.height );
-			renderer.setScissor( 0, 0, size.width, size.height );
-			cameraL.matrixWorld.multiplyMatrices( camera.matrixWorld, stereoTransformL );
-			renderer.render( sceneL, cameraL );
+			renderer.setViewport( 0, 0, size.width / 2, size.height );
+			renderer.setScissor( 0, 0, size.width / 2, size.height );
+			renderer.render( scene, cameraL );
 
 			// render right eye
-			renderer.setViewport( size.width, 0, size.width, size.height );
-			renderer.setScissor( size.width, 0, size.width, size.height );
-			cameraR.matrixWorld.multiplyMatrices( camera.matrixWorld, stereoTransformR );
-			renderer.render( sceneR, cameraR );
+			renderer.setViewport( size.width / 2, 0, size.width / 2, size.height );
+			renderer.setScissor( size.width / 2, 0, size.width / 2, size.height );
+			renderer.render( scene, cameraR );
 
-			renderer.enableScissorTest( false );
-
-			if ( autoUpdate === true ) {
-
-				scene.autoUpdate = autoUpdate;
-
-			}
+			renderer.setScissorTest( false );
 
 			return;
 
 		}
 
 		// Regular render mode if not HMD
-
-		if ( Array.isArray( scene ) ) scene = scene[ 0 ];
 
 		renderer.render( scene, camera );
 

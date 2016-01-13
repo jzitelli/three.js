@@ -19,30 +19,15 @@ def _material(func):
 
         """
 
+        material = None
         if isinstance(name, types.Material):
             material = name
-        else:
+        elif name:
             material = data.materials[name]
 
-        return func(material, *args, **kwargs)
+        return func(material, *args, **kwargs) if material else None
 
     return inner
-
-
-@_material
-def ambient_color(material):
-    """
-
-    :param material:
-    :return: rgb value
-    :rtype: tuple
-
-    """
-    logger.debug("material.ambient_color(%s)", material)
-    diffuse = diffuse_color(material)
-    return (material.ambient * diffuse[0],
-            material.ambient * diffuse[1],
-            material.ambient * diffuse[2])
 
 
 @_material
@@ -214,7 +199,7 @@ def normal_scale(material):
     logger.debug("material.normal_scale(%s)", material)
     for texture in _valid_textures(material):
         if texture.use_map_normal:
-            return texture.normal_factor
+            return (texture.normal_factor, texture.normal_factor)
 
 
 @_material
@@ -257,6 +242,9 @@ def shading(material):
         True: constants.PHONG,
         False: constants.LAMBERT
     }
+
+    if material.use_shadeless:
+        return constants.BASIC
 
     return dispatch[material.specular_intensity > 0.0]
 

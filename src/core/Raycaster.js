@@ -1,6 +1,6 @@
 /**
  * @author mrdoob / http://mrdoob.com/
- * @author bhouston / http://exocortex.com/
+ * @author bhouston / http://clara.io/
  * @author stephomi / http://stephaneginier.com/
  */
 
@@ -33,13 +33,13 @@
 
 	};
 
-	function descSort( a, b ) {
+	function ascSort( a, b ) {
 
 		return a.distance - b.distance;
 
 	}
 
-	var intersectObject = function ( object, raycaster, intersects, recursive ) {
+	function intersectObject( object, raycaster, intersects, recursive ) {
 
 		if ( object.visible === false ) return;
 
@@ -57,7 +57,7 @@
 
 		}
 
-	};
+	}
 
 	//
 
@@ -101,7 +101,7 @@
 
 			intersectObject( object, this, intersects, recursive );
 
-			intersects.sort( descSort );
+			intersects.sort( ascSort );
 
 			return intersects;
 
@@ -124,7 +124,7 @@
 
 			}
 
-			intersects.sort( descSort );
+			intersects.sort( ascSort );
 
 			return intersects;
 

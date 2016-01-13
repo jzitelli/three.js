@@ -1,7 +1,7 @@
 /**
  * @author alteredq / http://alteredqualia.com/
  * @author WestLangley / http://github.com/WestLangley
- * @author bhouston / http://exocortex.com
+ * @author bhouston / http://clara.io
  */
 
 THREE.Matrix3 = function () {
@@ -71,20 +71,6 @@ THREE.Matrix3.prototype = {
 		);
 
 		return this;
-
-	},
-
-	multiplyVector3: function ( vector ) {
-
-		console.warn( 'THREE.Matrix3: .multiplyVector3() has been removed. Use vector.applyMatrix3( matrix ) instead.' );
-		return vector.applyMatrix3( this );
-
-	},
-
-	multiplyVector3Array: function ( a ) {
-
-		console.warn( 'THREE.Matrix3: .multiplyVector3Array() has been renamed. Use matrix.applyToVector3Array( array ) instead.' );
-		return this.applyToVector3Array( a );
 
 	},
 
@@ -164,7 +150,7 @@ THREE.Matrix3.prototype = {
 
 	},
 
-	getInverse: function ( matrix, throwOnInvertible ) {
+	getInverse: function ( matrix, throwOnDegenerate ) {
 
 		// input: THREE.Matrix4
 		// ( based on http://code.google.com/p/webgl-mjs/ )
@@ -188,9 +174,9 @@ THREE.Matrix3.prototype = {
 
 		if ( det === 0 ) {
 
-			var msg = "Matrix3.getInverse(): can't invert matrix, determinant is 0";
+			var msg = "THREE.Matrix3.getInverse(): can't invert matrix, determinant is 0";
 
-			if ( throwOnInvertible || false ) {
+			if ( throwOnDegenerate || false ) {
 
 				throw new Error( msg );
 

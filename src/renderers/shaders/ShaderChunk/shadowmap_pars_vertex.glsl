@@ -1,6 +1,6 @@
 #ifdef USE_SHADOWMAP
 
-	varying vec4 vShadowCoord[ MAX_SHADOWS ];
-	uniform mat4 shadowMatrix[ MAX_SHADOWS ];
+	uniform mat4 shadowMatrix[ NUM_SHADOWS ];
+	varying vec4 vShadowCoord[ NUM_SHADOWS ];
 
 #endif

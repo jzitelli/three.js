@@ -21,8 +21,10 @@ Sidebar.Animation = function ( editor ) {
 	container.addStatic( new UI.Text( 'Animation' ).setTextTransform( 'uppercase' ) );
 	container.add( new UI.Break() );
 
-	var animationsRow = new UI.Panel();
+	var animationsRow = new UI.Row();
 	container.add( animationsRow );
+
+	/*
 
 	var animations = {};
 
@@ -104,6 +106,8 @@ Sidebar.Animation = function ( editor ) {
 		}
 
 	} );
+
+	*/
 
 	return container;
 

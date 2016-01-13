@@ -1,8 +1,14 @@
 /**
  * @author szimek / https://github.com/szimek/
  * @author alteredq / http://alteredqualia.com/
+ * @author Marius Kintel / https://github.com/kintel
  */
 
+/*
+ In options, we can specify:
+ * Texture parameters for an auto-generated target texture
+ * depthBuffer/stencilBuffer: Booleans to indicate if we should generate these buffers
+*/
 THREE.WebGLRenderTarget = function ( width, height, options ) {
 
 	this.uuid = THREE.Math.generateUUID();
@@ -10,28 +16,19 @@ THREE.WebGLRenderTarget = function ( width, height, options ) {
 	this.width = width;
 	this.height = height;
 
+	this.scissor = new THREE.Vector4( 0, 0, width, height );
+	this.scissorTest = false;
+
+	this.viewport = new THREE.Vector4( 0, 0, width, height );
+
 	options = options || {};
 
-	this.wrapS = options.wrapS !== undefined ? options.wrapS : THREE.ClampToEdgeWrapping;
-	this.wrapT = options.wrapT !== undefined ? options.wrapT : THREE.ClampToEdgeWrapping;
+	if ( options.minFilter === undefined ) options.minFilter = THREE.LinearFilter;
 
-	this.magFilter = options.magFilter !== undefined ? options.magFilter : THREE.LinearFilter;
-	this.minFilter = options.minFilter !== undefined ? options.minFilter : THREE.LinearMipMapLinearFilter;
-
-	this.anisotropy = options.anisotropy !== undefined ? options.anisotropy : 1;
-
-	this.offset = new THREE.Vector2( 0, 0 );
-	this.repeat = new THREE.Vector2( 1, 1 );
-
-	this.format = options.format !== undefined ? options.format : THREE.RGBAFormat;
-	this.type = options.type !== undefined ? options.type : THREE.UnsignedByteType;
+	this.texture = new THREE.Texture( undefined, undefined, options.wrapS, options.wrapT, options.magFilter, options.minFilter, options.format, options.type, options.anisotropy );
 
 	this.depthBuffer = options.depthBuffer !== undefined ? options.depthBuffer : true;
 	this.stencilBuffer = options.stencilBuffer !== undefined ? options.stencilBuffer : true;
-
-	this.generateMipmaps = true;
-
-	this.shareDepthFrom = options.shareDepthFrom !== undefined ? options.shareDepthFrom : null;
 
 };
 
@@ -50,6 +47,9 @@ THREE.WebGLRenderTarget.prototype = {
 
 		}
 
+		this.viewport.set( 0, 0, width, height );
+		this.scissor.set( 0, 0, width, height );
+
 	},
 
 	clone: function () {
@@ -63,24 +63,12 @@ THREE.WebGLRenderTarget.prototype = {
 		this.width = source.width;
 		this.height = source.height;
 
-		this.wrapS = source.wrapS;
-		this.wrapT = source.wrapT;
+		this.viewport.copy( source.viewport );
 
-		this.magFilter = source.magFilter;
-		this.minFilter = source.minFilter;
-
-		this.anisotropy = source.anisotropy;
-
-		this.offset.copy( source.offset );
-		this.repeat.copy( source.repeat );
-
-		this.format = source.format;
-		this.type = source.type;
+		this.texture = source.texture.clone();
 
 		this.depthBuffer = source.depthBuffer;
 		this.stencilBuffer = source.stencilBuffer;
-
-		this.generateMipmaps = source.generateMipmaps;
 
 		this.shareDepthFrom = source.shareDepthFrom;
 

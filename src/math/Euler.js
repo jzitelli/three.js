@@ -1,7 +1,7 @@
 /**
  * @author mrdoob / http://mrdoob.com/
  * @author WestLangley / http://github.com/WestLangley
- * @author bhouston / http://exocortex.com
+ * @author bhouston / http://clara.io
  */
 
 THREE.Euler = function ( x, y, z, order ) {
@@ -88,7 +88,7 @@ THREE.Euler.prototype = {
 
 	clone: function () {
 
-		return new this.constructor( this._x, this._y, this._z, this._order);
+		return new this.constructor( this._x, this._y, this._z, this._order );
 
 	},
 

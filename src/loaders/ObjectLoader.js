@@ -24,7 +24,6 @@ THREE.ObjectLoader.prototype = {
 		var scope = this;
 
 		var loader = new THREE.XHRLoader( scope.manager );
-		loader.setCrossOrigin( this.crossOrigin );
 		loader.load( url, function ( text ) {
 
 			scope.parse( JSON.parse( text ), onLoad );
@@ -57,7 +56,14 @@ THREE.ObjectLoader.prototype = {
 
 		var textures  = this.parseTextures( json.textures, images );
 		var materials = this.parseMaterials( json.materials, textures );
+
 		var object = this.parseObject( json.object, geometries, materials );
+
+		if ( json.animations ) {
+
+			object.animations = this.parseAnimations( json.animations );
+
+		}
 
 		if ( json.images === undefined || json.images.length === 0 ) {
 
@@ -251,11 +257,13 @@ THREE.ObjectLoader.prototype = {
 
 						break;
 
-					case 'TextGeometry':
+					case 'LatheGeometry':
 
-						geometry = new THREE.TextGeometry(
-							data.text,
-							data.data
+						geometry = new THREE.LatheGeometry(
+							data.points,
+							data.segments,
+							data.phiStart,
+							data.phiLength
 						);
 
 						break;
@@ -313,6 +321,22 @@ THREE.ObjectLoader.prototype = {
 		}
 
 		return materials;
+
+	},
+
+	parseAnimations: function ( json ) {
+
+		var animations = [];
+
+		for ( var i = 0; i < json.length; i ++ ) {
+
+			var clip = THREE.AnimationClip.parse( json[ i ] );
+
+			animations.push( clip );
+
+		}
+
+		return animations;
 
 	},
 
@@ -424,7 +448,7 @@ THREE.ObjectLoader.prototype = {
 
 			var object;
 
-			var getGeometry = function ( name ) {
+			function getGeometry( name ) {
 
 				if ( geometries[ name ] === undefined ) {
 
@@ -434,9 +458,11 @@ THREE.ObjectLoader.prototype = {
 
 				return geometries[ name ];
 
-			};
+			}
 
-			var getMaterial = function ( name ) {
+			function getMaterial( name ) {
+
+				if ( name === undefined ) return undefined;
 
 				if ( materials[ name ] === undefined ) {
 
@@ -446,7 +472,7 @@ THREE.ObjectLoader.prototype = {
 
 				return materials[ name ];
 
-			};
+			}
 
 			switch ( data.type ) {
 
@@ -470,7 +496,7 @@ THREE.ObjectLoader.prototype = {
 
 				case 'AmbientLight':
 
-					object = new THREE.AmbientLight( data.color );
+					object = new THREE.AmbientLight( data.color, data.intensity );
 
 					break;
 
@@ -500,7 +526,18 @@ THREE.ObjectLoader.prototype = {
 
 				case 'Mesh':
 
-					object = new THREE.Mesh( getGeometry( data.geometry ), getMaterial( data.material ) );
+					var geometry = getGeometry( data.geometry );
+					var material = getMaterial( data.material );
+
+					if ( geometry.bones && geometry.bones.length > 0 ) {
+
+						object = new THREE.SkinnedMesh( geometry, material );
+
+					} else {
+
+						object = new THREE.Mesh( geometry, material );
+
+					}
 
 					break;
 
