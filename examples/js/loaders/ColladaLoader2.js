@@ -386,7 +386,8 @@ THREE.ColladaLoader.prototype = {
 					case 'emission':
 					case 'diffuse':
 					case 'specular':
-					case 'transparent':
+					case 'shininess':
+					case 'transparency':
 						data[ child.nodeName ] = parseEffectParameter( child );
 						break;
 
@@ -412,6 +413,10 @@ THREE.ColladaLoader.prototype = {
 
 					case 'color':
 						data[ child.nodeName ] = parseFloats( child.textContent );
+						break;
+
+					case 'float':
+						data[ child.nodeName ] = parseFloat( child.textContent );
 						break;
 
 					case 'texture':
@@ -530,9 +535,19 @@ THREE.ColladaLoader.prototype = {
 						if ( parameter.color && material.specular )
 							material.specular.fromArray( parameter.color );
 						break;
+					case 'shininess':
+						if ( parameter.float && material.shininess )
+							material.shininess = parameter.float;
+						break;
 					case 'emission':
 						if ( parameter.color && material.emissive )
 							material.emissive.fromArray( parameter.color );
+						break;
+					case 'transparency':
+						if ( parameter.float )
+							material.opacity = parameter.float;
+						if ( parameter.float !== 1 )
+							material.transparent = true;
 						break;
 				}
 
