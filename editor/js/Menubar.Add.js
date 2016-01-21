@@ -246,29 +246,29 @@ Menubar.Add = function ( editor ) {
 
 	var option = new UI.Row();
 	option.setClass( 'option' );
-	option.setTextContent( 'Lathe geometry' );
+	option.setTextContent( 'Lathe' );
 	option.onClick( function() {
 
-		var points = [];
+		var points = [
+			new THREE.Vector2( 0, 0 ),
+			new THREE.Vector2( 4, 0 ),
+			new THREE.Vector2( 3.5, 0.5 ),
+			new THREE.Vector2( 1, 0.75 ),
+			new THREE.Vector2( 0.8, 1 ),
+			new THREE.Vector2( 0.8, 4 ),
+			new THREE.Vector2( 1, 4.2 ),
+			new THREE.Vector2( 1.4, 4.8 ),
+			new THREE.Vector2( 2, 5 ),
+			new THREE.Vector2( 2.5, 5.4 ),
+			new THREE.Vector2( 3, 12 )
+		];
 		var segments = 20;
 		var phiStart = 0;
 		var phiLength = 2 * Math.PI;
 
-		points.push( new THREE.Vector3( 0, 0, 0 ) );
-		points.push( new THREE.Vector3( 4, 0, 0 ) );
-		points.push( new THREE.Vector3( 3.5, 0, 0.5 ) );
-		points.push( new THREE.Vector3( 1, 0, 0.75 ) );
-		points.push( new THREE.Vector3( 0.8, 0, 1 ) );
-		points.push( new THREE.Vector3( 0.8, 0, 4 ) );
-		points.push( new THREE.Vector3( 1, 0, 4.2 ) );
-		points.push( new THREE.Vector3( 1.4, 0, 4.8 ) );
-		points.push( new THREE.Vector3( 2, 0, 5 ) );
-		points.push( new THREE.Vector3( 2.5, 0, 5.4 ) );
-		points.push( new THREE.Vector3( 2.5, 0, 12 ) );
-
 		var geometry = new THREE.LatheGeometry( points, segments, phiStart, phiLength );
 		var mesh = new THREE.Mesh( geometry, new THREE.MeshStandardMaterial( { side: THREE.DoubleSide } ) );
-		mesh.name = 'Lathe ' + ( ++meshCount );
+		mesh.name = 'Lathe ' + ( ++ meshCount );
 
 		editor.execute( new AddObjectCommand( mesh ) );
 
