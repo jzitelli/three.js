@@ -35,6 +35,7 @@
     "examples/js/effects/VREffect.js",
     "examples/js/controls/VRControls.js",
     "examples/js/geometries/TextGeometry.js",
+    "examples/js/utils/FontUtils.js",
     "examples/js/Detector.js",
     "examples/js/ImprovedNoise.js",
     "examples/js/WaterShader.js",
