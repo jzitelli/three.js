@@ -33,6 +33,7 @@
   },
   "files": [
     "examples/js/effects/VREffect.js",
-    "examples/js/controls/VRControls.js"
+    "examples/js/controls/VRControls.js",
+    "build/"
   ]
 }
