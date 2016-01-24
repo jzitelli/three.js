@@ -64,11 +64,7 @@
 			var radius = 100, theta = 0;
 			var crosshair;
 
-			var SCENARIO; // in both cases the camera is a child of an object that is moving (magicCarpet in this example)
 			// the camera's local matrix is dynamic, e.g. controlled by vrControls:
-			SCENARIO = "A";
-			// the camera's local matrix is fixed (less common case, it seems to me, but I still like to handle it):
-			//SCENARIO = "B";
 			var magicCarpet;
 			var flyControls;
 			var clock = new THREE.Clock();
@@ -152,15 +148,10 @@
 
 				} );
 
-				if (SCENARIO == "A") {
-					magicCarpet = new THREE.Mesh( new THREE.PlaneGeometry( 1.5, 2 ).rotateX( -Math.PI / 2 ).translate( 0, -1, 0 ) );
-				}
-				else if (SCENARIO == "B") {
-					magicCarpet = new THREE.Mesh( new THREE.PlaneGeometry( 1.5, 2 ).rotateX( -Math.PI / 2 ) );
-					camera.position.y += 1;
-				}
+				magicCarpet = new THREE.Mesh( new THREE.PlaneGeometry( 1.5, 2 ).rotateX( -Math.PI / 2 ).translate( 0, -1, 0 ) );
 				magicCarpet.add( camera );
 				scene.add( magicCarpet );
+
 				flyControls = new THREE.FlyControls( magicCarpet );
 				flyControls.movementSpeed *= 20;
 				flyControls.rollSpeed *= 10;
@@ -236,10 +227,10 @@
 				}
 
 				var delta = clock.getDelta();
+
 				flyControls.update( delta );
-				if (SCENARIO == "A") {
-					vrControls.update();
-				}
+
+				vrControls.update();
 
 				crosshair.quaternion.copy( camera.quaternion );
 				crosshair.position.set( 0, 0, 0 );
