@@ -70,6 +70,8 @@ THREE.VREffect = function ( renderer, onError ) {
 
 				vrHMD = devices[ i ];
 
+				updateSeparationMatrices();
+				
 				break; // We keep the first we encounter
 
 			}
