@@ -45,6 +45,8 @@
     "examples/textures/cube/MilkyWay/",
     "examples/textures/cube/skybox/",
     "examples/textures/cube/SwedishRoyalCastle/",
+    "examples/fonts/helvetiker_regular.typeface.js",
+    "examples/fonts/helvetiker_bold.typeface.js",
     "build/"
   ]
 }
