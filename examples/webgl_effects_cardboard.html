@@ -78,16 +78,16 @@
 
 				window.addEventListener( 'resize', onWindowResize, false );
 
-                                var canvas = renderer.domElement;
-                                if ( canvas.mozRequestFullScreen ) {
-                                    
-                                    canvas.mozRequestFullScreen();
-    
-		                } else if ( canvas.webkitRequestFullscreen ) {
+				var canvas = renderer.domElement;
+				if ( canvas.mozRequestFullScreen ) {
 
-			            canvas.webkitRequestFullscreen();
+					canvas.mozRequestFullScreen();
 
-		                }
+				} else if ( canvas.webkitRequestFullscreen ) {
+
+					canvas.webkitRequestFullscreen();
+
+				}
 
 			}
 
