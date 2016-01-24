@@ -30,5 +30,9 @@
   "devDependencies": {
     "jscs": "^1.13.1",
     "lodash": "^3.10.0"
-  }
+  },
+  "files": [
+    "examples/js/effects/VREffect.js",
+    "examples/js/controls/VRControls.js"
+  ]
 }
