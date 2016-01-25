@@ -46,12 +46,6 @@ THREE.VREffect = function ( renderer, onError ) {
 			var eyeFOVL = vrHMD.getEyeParameters( 'left'  ).recommendedFieldOfView;
 			var eyeFOVR = vrHMD.getEyeParameters( 'right' ).recommendedFieldOfView;
 
-			cameraL.near = near;
-			cameraR.near = near;
-
-			cameraL.far = far;
-			cameraR.far = far;
-
 			cameraL.projectionMatrix = fovToProjection( eyeFOVL, true, near, far );
 			cameraR.projectionMatrix = fovToProjection( eyeFOVR, true, near, far );
 
