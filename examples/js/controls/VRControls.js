@@ -21,7 +21,7 @@ THREE.VRControls = function ( object, onError ) {
 
 		}
 
-		if ( vrInputs.length === 0) {
+		if ( vrInputs.length === 0 ) {
 
 			if ( onError ) onError( 'PositionSensorVRDevice not available' );
 
