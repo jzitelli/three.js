@@ -14,9 +14,6 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	var vrHMD;
 
-	var stereoTransformL = new THREE.Matrix4();
-	var stereoTransformR = new THREE.Matrix4();
-
 	var cameraL = new THREE.PerspectiveCamera();
 	var cameraR = new THREE.PerspectiveCamera();
 
@@ -26,34 +23,37 @@ THREE.VREffect = function ( renderer, onError ) {
 	cameraL.matrixAutoUpdate = false;
 	cameraR.matrixAutoUpdate = false;
 
-	this.scale = 1;
+	var stereoTransformL = new THREE.Matrix4();
+	var stereoTransformR = new THREE.Matrix4();
 
-	var updateSeparationMatrices = function () {
+	function updateSeparationMatrices ( scale ) {
+
+		scale = scale || 1;
 
 		if ( vrHMD ) {
 
 			var eyeTransL = vrHMD.getEyeParameters( 'left'  ).eyeTranslation;
 			var eyeTransR = vrHMD.getEyeParameters( 'right' ).eyeTranslation;
 
-			stereoTransformL.makeTranslation( this.scale * eyeTransL.x, this.scale * eyeTransL.y, this.scale * eyeTransL.z );
-			stereoTransformR.makeTranslation( this.scale * eyeTransR.x, this.scale * eyeTransR.y, this.scale * eyeTransR.z );
+			stereoTransformL.makeTranslation( scale * eyeTransL.x, scale * eyeTransL.y, scale * eyeTransL.z );
+			stereoTransformR.makeTranslation( scale * eyeTransR.x, scale * eyeTransR.y, scale * eyeTransR.z );
 
 		}
 
-	}.bind(this);
+	}
+
+	var _near,
+		_far;
 
 	function updateProjectionMatrices ( near, far ) {
+
+		near = near || _near;
+		far  = far  || _far;
 
 		if ( vrHMD ) {
 
 			var eyeFOVL = vrHMD.getEyeParameters( 'left'  ).recommendedFieldOfView;
 			var eyeFOVR = vrHMD.getEyeParameters( 'right' ).recommendedFieldOfView;
-
-			cameraL.near = near;
-			cameraR.near = near;
-
-			cameraL.far = far;
-			cameraR.far = far;
 
 			cameraL.projectionMatrix = fovToProjection( eyeFOVL, true, near, far );
 			cameraR.projectionMatrix = fovToProjection( eyeFOVR, true, near, far );
@@ -62,7 +62,14 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	}
 
-	function gotVRDevices( devices ) {
+	this.updateHMDParams = function ( scale, near, far ) {
+
+		updateSeparationMatrices( scale );
+		updateProjectionMatrices( near, far );
+
+	};
+
+	function gotVRDevices ( devices ) {
 
 		for ( var i = 0; i < devices.length; i ++ ) {
 
@@ -132,80 +139,74 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	// render
 
-	this.render = ( function () {
+	this.render = function ( scene, camera ) {
 
-		var near,
-			far;
+		if ( Array.isArray( scene ) ) {
 
-		return function ( scene, camera ) {
+			console.warn( 'THREE.VREffect.render() no longer supports arrays. Use object.layers instead.' );
+			scene = scene[ 0 ];
 
-			if ( Array.isArray( scene ) ) {
+		}
 
-				console.warn( 'THREE.VREffect.render() no longer supports arrays. Use object.layers instead.' );
-				scene = scene[ 0 ];
+		if ( vrHMD ) {
+
+			var autoUpdate;
+					
+			if ( scene.autoUpdate === true ) {
+					
+				scene.updateMatrixWorld();
+				autoUpdate = scene.autoUpdate;
+				scene.autoUpdate = false;
+					
+			}
+	
+			var size = renderer.getSize();
+			var width  = size.width / 2;
+			var height = size.height;
+
+			renderer.setScissorTest( true );
+			renderer.clear();
+
+			if ( camera.parent === null ) camera.updateMatrixWorld();
+			
+			if ( _near !== camera.near || _far !== camera.far ) {
+				
+				_near = camera.near;
+				_far = camera.far;
+				updateProjectionMatrices( _near, _far );
+				
+			}
+		
+			// render left eye
+			renderer.setViewport( 0, 0, width, height );
+			renderer.setScissor(  0, 0, width, height );
+			cameraL.matrixWorld.multiplyMatrices( camera.matrixWorld, stereoTransformL );
+			renderer.render( scene, cameraL );
+			
+			// render right eye
+			renderer.setViewport( width, 0, width, height );
+			renderer.setScissor(  width, 0, width, height );
+			cameraR.matrixWorld.multiplyMatrices( camera.matrixWorld, stereoTransformR );
+			renderer.render( scene, cameraR );
+			
+			renderer.setScissorTest( false );
+
+			if ( autoUpdate === true ) {
+				
+				scene.autoUpdate = true;
 
 			}
 
-			if ( vrHMD ) {
-
-				var autoUpdate;
-						
-				if ( scene.autoUpdate === true ) {
-						
-					scene.updateMatrixWorld();
-					autoUpdate = scene.autoUpdate;
-					scene.autoUpdate = false;
-						
-				}
+		} else {
 		
-				var size = renderer.getSize();
-				var width  = size.width / 2;
-				var height = size.height;
-
-				renderer.setScissorTest( true );
-				renderer.clear();
-
-				if ( camera.parent === null ) camera.updateMatrixWorld();
-				
-				if ( near !== camera.near || far !== camera.far ) {
-					
-					near = camera.near;
-					far = camera.far;
-					updateProjectionMatrices( near, far );
-					
-				}
+			// Regular render mode if not HMD
 			
-				// render left eye
-				renderer.setViewport( 0, 0, width, height );
-				renderer.setScissor(  0, 0, width, height );
-				cameraL.matrixWorld.multiplyMatrices( camera.matrixWorld, stereoTransformL );
-				renderer.render( scene, cameraL );
-				
-				// render right eye
-				renderer.setViewport( width, 0, width, height );
-				renderer.setScissor(  width, 0, width, height );
-				cameraR.matrixWorld.multiplyMatrices( camera.matrixWorld, stereoTransformR );
-				renderer.render( scene, cameraR );
-				
-				renderer.setScissorTest( false );
-
-				if ( autoUpdate === true ) {
-					
-					scene.autoUpdate = true;
-
-				}
-
-			} else {
-			
-				// Regular render mode if not HMD
-				
-				renderer.render( scene, camera );
-			
-			}
+			renderer.render( scene, camera );
 		
-		};
+		}
+	
+	};
 
-	} ) ();
 
 	//
 
