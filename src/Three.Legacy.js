@@ -314,7 +314,7 @@ Object.defineProperties( THREE.Light.prototype, {
 	},
 	shadowDarkness: {
 		set: function ( value ) {
-			this.shadow.darkness = value;
+			console.warn( 'THREE.Light: .shadowDarkness has been removed.' );
 		}
 	},
 	shadowMapWidth: {
@@ -552,15 +552,6 @@ Object.defineProperties( THREE.WebGLRenderer.prototype, {
 		set: function ( value ) {
 			console.warn( 'THREE.WebGLRenderer: .shadowMapCullFace is now .shadowMap.cullFace.' );
 			this.shadowMap.cullFace = value;
-		}
-	},
-	shadowMapDebug: {
-		get: function () {
-			return this.shadowMap.debug;
-		},
-		set: function ( value ) {
-			console.warn( 'THREE.WebGLRenderer: .shadowMapDebug is now .shadowMap.debug.' );
-			this.shadowMap.debug = value;
 		}
 	}
 } );
