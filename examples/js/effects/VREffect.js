@@ -42,8 +42,8 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	}
 
-	var _near,
-		_far;
+	var _near = 0.1;
+	var _far = 1000;
 
 	function updateProjectionMatrices ( near, far ) {
 
@@ -62,12 +62,14 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	}
 
-	this.updateHMDParams = function ( scale, near, far ) {
+	function updateHMDParams ( scale, near, far ) {
 
 		updateSeparationMatrices( scale );
 		updateProjectionMatrices( near, far );
 
-	};
+	}
+
+	this.updateHMDParams = updateHMDParams;
 
 	function gotVRDevices ( devices ) {
 
@@ -77,7 +79,7 @@ THREE.VREffect = function ( renderer, onError ) {
 
 				vrHMD = devices[ i ];
 
-				updateSeparationMatrices();
+				updateHMDParams();
 				
 				break; // We keep the first we encounter
 
@@ -170,10 +172,10 @@ THREE.VREffect = function ( renderer, onError ) {
 			if ( camera.parent === null ) camera.updateMatrixWorld();
 			
 			if ( _near !== camera.near || _far !== camera.far ) {
-				
+
 				_near = camera.near;
-				_far = camera.far;
-				updateProjectionMatrices( _near, _far );
+				_far  = camera.far;
+				updateProjectionMatrices( camera.near, camera.far );
 				
 			}
 		
