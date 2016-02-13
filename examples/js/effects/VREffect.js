@@ -52,8 +52,11 @@ THREE.VREffect = function ( renderer, onError ) {
 
 		if ( vrHMD ) {
 
-			var eyeFOVL = vrHMD.getEyeParameters( 'left'  ).recommendedFieldOfView;
-			var eyeFOVR = vrHMD.getEyeParameters( 'right' ).recommendedFieldOfView;
+			var eyeParamsL = vrHMD.getEyeParameters( 'left'  );
+			var eyeParamsR = vrHMD.getEyeParameters( 'right'  );
+
+			var eyeFOVL = eyeParamsL.recommendedFieldOfView;
+			var eyeFOVR = eyeParamsR.recommendedFieldOfView;
 
 			cameraL.projectionMatrix = fovToProjection( eyeFOVL, true, near, far );
 			cameraR.projectionMatrix = fovToProjection( eyeFOVR, true, near, far );
@@ -80,7 +83,7 @@ THREE.VREffect = function ( renderer, onError ) {
 				vrHMD = devices[ i ];
 
 				updateHMDParams();
-				
+
 				break; // We keep the first we encounter
 
 			}
@@ -143,25 +146,18 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	this.render = function ( scene, camera ) {
 
-		if ( Array.isArray( scene ) ) {
-
-			console.warn( 'THREE.VREffect.render() no longer supports arrays. Use object.layers instead.' );
-			scene = scene[ 0 ];
-
-		}
-
 		if ( vrHMD ) {
 
 			var autoUpdate;
-					
+
 			if ( scene.autoUpdate === true ) {
-					
+
 				scene.updateMatrixWorld();
 				autoUpdate = scene.autoUpdate;
 				scene.autoUpdate = false;
-					
+
 			}
-	
+
 			var size = renderer.getSize();
 			var width  = size.width / 2;
 			var height = size.height;
@@ -170,45 +166,61 @@ THREE.VREffect = function ( renderer, onError ) {
 			renderer.clear();
 
 			if ( camera.parent === null ) camera.updateMatrixWorld();
-			
+
 			if ( _near !== camera.near || _far !== camera.far ) {
 
 				_near = camera.near;
 				_far  = camera.far;
 				updateProjectionMatrices( camera.near, camera.far );
-				
+
 			}
-		
+
+			var renderRectL = vrHMD.getEyeParameters( 'left' ).renderRect;
+			var renderRectR = vrHMD.getEyeParameters( 'right' ).renderRect;
+
 			// render left eye
-			renderer.setViewport( 0, 0, width, height );
-			renderer.setScissor(  0, 0, width, height );
+
+			if ( renderRectL === undefined ) {
+
+				renderRectL = { x: 0, y: 0, width: width, height: height };
+
+			}
+
+			renderer.setViewport( renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height );
+			renderer.setScissor( renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height );
 			cameraL.matrixWorld.multiplyMatrices( camera.matrixWorld, stereoTransformL );
 			renderer.render( scene, cameraL );
-			
+
 			// render right eye
-			renderer.setViewport( width, 0, width, height );
-			renderer.setScissor(  width, 0, width, height );
+
+			if ( renderRectR === undefined ) {
+
+				renderRectR = { x: width, y: 0, width: width, height: height };
+
+			}
+
+			renderer.setViewport( renderRectR.x, renderRectR.y, renderRectR.width, renderRectR.height );
+			renderer.setScissor( renderRectR.x, renderRectR.y, renderRectR.width, renderRectR.height );
 			cameraR.matrixWorld.multiplyMatrices( camera.matrixWorld, stereoTransformR );
 			renderer.render( scene, cameraR );
-			
+
 			renderer.setScissorTest( false );
 
 			if ( autoUpdate === true ) {
-				
+
 				scene.autoUpdate = true;
 
 			}
 
 		} else {
-		
-			// Regular render mode if not HMD
-			
-			renderer.render( scene, camera );
-		
-		}
-	
-	};
 
+			// Regular render mode if not HMD
+
+			renderer.render( scene, camera );
+
+		}
+
+	};
 
 	//
 
