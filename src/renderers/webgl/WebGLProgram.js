@@ -7,6 +7,43 @@ THREE.WebGLProgram = ( function () {
 	var arrayStructRe = /^([\w\d_]+)\[(\d+)\]\.([\w\d_]+)$/;
 	var arrayRe = /^([\w\d_]+)\[0\]$/;
 
+	function getTexelDecodingFunction( functionName, encoding ) {
+
+		var code = "vec4 " + functionName + "( vec4 value ) { return ";
+
+		switch ( encoding ) {
+
+			case THREE.LinearEncoding:
+				code += "value";
+				break;
+			case THREE.sRGBEncoding:
+				code += "sRGBToLinear( value )";
+				break;
+			case THREE.RGBEEncoding:
+				code += "RGBEToLinear( value )";
+				break;
+			case THREE.RGBM7Encoding:
+				code += "RGBMToLinear( value, 7.0 )";
+				break;
+			case THREE.RGBM16Encoding:
+				code += "RGBMToLinear( value, 16.0 )";
+				break;
+			case THREE.RGBDEncoding:
+				code += "RGBDToLinear( value, 256.0 )";
+				break;
+			case THREE.GammaEncoding:
+				code += "GammaToLinear( value, float( GAMMA_FACTOR ) )";
+				break;
+			default:
+				throw new Error( 'unsupported encoding: ' + encoding );
+
+		}
+
+		code += "; }";
+		return code;
+
+	}
+
 	function generateExtensions( extensions, parameters, rendererExtensions ) {
 
 		extensions = extensions || {};
@@ -158,6 +195,28 @@ THREE.WebGLProgram = ( function () {
 			.replace( /NUM_SPOT_LIGHTS/g, parameters.numSpotLights )
 			.replace( /NUM_POINT_LIGHTS/g, parameters.numPointLights )
 			.replace( /NUM_HEMI_LIGHTS/g, parameters.numHemiLights );
+
+	}
+
+	function parseIncludes( string ) {
+
+		var pattern = /#include +<([\w\d.]+)>/g;
+
+		function replace( match, include ) {
+
+			var replace = THREE.ShaderChunk[ include ];
+
+			if ( replace === undefined ) {
+
+				throw new Error( 'Can not resolve #include <' + include + '>' );
+
+			}
+
+			return parseIncludes( replace );
+
+		}
+
+		return string.replace( pattern, replace );
 
 	}
 
@@ -384,7 +443,6 @@ THREE.WebGLProgram = ( function () {
 
 			].filter( filterEmptyLine ).join( '\n' );
 
-
 			prefixFragment = [
 
 				customExtensions,
@@ -438,13 +496,22 @@ THREE.WebGLProgram = ( function () {
 				'uniform mat4 viewMatrix;',
 				'uniform vec3 cameraPosition;',
 
+				( parameters.mapEncoding || parameters.envMapEncoding || parameters.emissiveMapEncoding ) ? THREE.ShaderChunk[ 'encodings' ] : '',
+
+				parameters.mapEncoding ? getTexelDecodingFunction( 'mapTexelToLinear', parameters.mapEncoding ) : '',
+				parameters.envMapEncoding ? getTexelDecodingFunction( 'envMapTexelToLinear', parameters.envMapEncoding ) : '',
+				parameters.emissiveMapEncoding ? getTexelDecodingFunction( 'emissiveMapTexelToLinear', parameters.emissiveMapEncoding ) : '',
+
 				'\n'
 
 			].filter( filterEmptyLine ).join( '\n' );
 
 		}
 
+		vertexShader = parseIncludes( vertexShader, parameters );
 		vertexShader = replaceLightNums( vertexShader, parameters );
+
+		fragmentShader = parseIncludes( fragmentShader, parameters );
 		fragmentShader = replaceLightNums( fragmentShader, parameters );
 
 		if ( material instanceof THREE.ShaderMaterial === false ) {
