@@ -103,10 +103,11 @@ THREE.ObjectLoader.prototype = {
 
 						break;
 
+					case 'BoxBufferGeometry':
 					case 'BoxGeometry':
 					case 'CubeGeometry': // backwards compatible
 
-						geometry = new THREE.BoxGeometry(
+						geometry = new THREE[ data.type === 'CubeGeometry' ? 'BoxGeometry' : data.type ](
 							data.width,
 							data.height,
 							data.depth,
@@ -118,19 +119,9 @@ THREE.ObjectLoader.prototype = {
 						break;
 
 					case 'CircleBufferGeometry':
-
-						geometry = new THREE.CircleBufferGeometry(
-							data.radius,
-							data.segments,
-							data.thetaStart,
-							data.thetaLength
-						);
-
-						break;
-
 					case 'CircleGeometry':
 
-						geometry = new THREE.CircleGeometry(
+						geometry = new THREE[ data.type ](
 							data.radius,
 							data.segments,
 							data.thetaStart,
@@ -155,22 +146,9 @@ THREE.ObjectLoader.prototype = {
 						break;
 
 					case 'SphereGeometry':
-
-						geometry = new THREE.SphereGeometry(
-							data.radius,
-							data.widthSegments,
-							data.heightSegments,
-							data.phiStart,
-							data.phiLength,
-							data.thetaStart,
-							data.thetaLength
-						);
-
-						break;
-
 					case 'SphereBufferGeometry':
 
-						geometry = new THREE.SphereBufferGeometry(
+						geometry = new THREE[ data.type ](
 							data.radius,
 							data.widthSegments,
 							data.heightSegments,
