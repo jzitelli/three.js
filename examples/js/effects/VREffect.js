@@ -46,6 +46,8 @@ THREE.VREffect = function ( renderer, onError ) {
 
 		}
 
+		updateSeparationMatrices();
+
 	}
 
 	if ( navigator.getVRDisplays ) {
