@@ -14,6 +14,8 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	var vrHMD;
 
+	var deprecatedAPI = false;
+
 	var cameraL = new THREE.PerspectiveCamera();
 	var cameraR = new THREE.PerspectiveCamera();
 
@@ -23,67 +25,15 @@ THREE.VREffect = function ( renderer, onError ) {
 	cameraL.matrixAutoUpdate = false;
 	cameraR.matrixAutoUpdate = false;
 
-	var stereoTransformL = new THREE.Matrix4();
-	var stereoTransformR = new THREE.Matrix4();
+	function gotVRDevices( devices ) {
 
-	function updateSeparationMatrices ( scale ) {
-
-		scale = scale || 1;
-
-		if ( vrHMD ) {
-
-			var eyeTransL = vrHMD.getEyeParameters( 'left'  ).eyeTranslation;
-			var eyeTransR = vrHMD.getEyeParameters( 'right' ).eyeTranslation;
-
-			stereoTransformL.makeTranslation( scale * eyeTransL.x, scale * eyeTransL.y, scale * eyeTransL.z );
-			stereoTransformR.makeTranslation( scale * eyeTransR.x, scale * eyeTransR.y, scale * eyeTransR.z );
-
-		}
-
-	}
-
-	var _near = 0.1;
-	var _far = 1000;
-
-	function updateProjectionMatrices ( near, far ) {
-
-		near = near || _near;
-		far  = far  || _far;
-
-		if ( vrHMD ) {
-
-			var eyeParamsL = vrHMD.getEyeParameters( 'left'  );
-			var eyeParamsR = vrHMD.getEyeParameters( 'right'  );
-
-			var eyeFOVL = eyeParamsL.recommendedFieldOfView;
-			var eyeFOVR = eyeParamsR.recommendedFieldOfView;
-
-			cameraL.projectionMatrix = fovToProjection( eyeFOVL, true, near, far );
-			cameraR.projectionMatrix = fovToProjection( eyeFOVR, true, near, far );
-
-		}
-
-	}
-
-	function updateHMDParams ( scale, near, far ) {
-
-		updateSeparationMatrices( scale );
-		updateProjectionMatrices( near, far );
-
-	}
-
-	this.updateHMDParams = updateHMDParams;
-
-	function gotVRDevices ( devices ) {
+		var deviceClass = deprecatedAPI ? HMDVRDevice : VRDisplay;
 
 		for ( var i = 0; i < devices.length; i ++ ) {
 
-			if ( devices[ i ] instanceof HMDVRDevice ) {
+			if ( devices[ i ] instanceof deviceClass ) {
 
 				vrHMD = devices[ i ];
-
-				updateHMDParams();
-
 				break; // We keep the first we encounter
 
 			}
@@ -98,49 +48,156 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	}
 
-	if ( navigator.getVRDevices ) {
+	if ( navigator.getVRDisplays ) {
 
+		navigator.getVRDisplays().then( gotVRDevices );
+
+	} else if ( navigator.getVRDevices ) {
+
+		// Deprecated API.
+		deprecatedAPI = true;
 		navigator.getVRDevices().then( gotVRDevices );
 
 	}
 
-	//
-
-	this.setSize = function( width, height ) {
-
-		renderer.setSize( width, height );
-
-	};
-
 	// fullscreen
 
-	var isFullscreen = false;
+	var isPresenting = false;
 
 	var canvas = renderer.domElement;
 	var fullscreenchange = canvas.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange';
 
-	document.addEventListener( fullscreenchange, function ( event ) {
+	document.addEventListener( fullscreenchange, function () {
 
-		isFullscreen = document.mozFullScreenElement || document.webkitFullscreenElement;
+		if ( deprecatedAPI ) {
+
+			isPresenting = document.mozFullScreenElement || document.webkitFullscreenElement;
+
+		}
+
+	}, false );
+
+	window.addEventListener( 'vrdisplaypresentchange', function () {
+
+		isPresenting = vrHMD.isPresenting;
 
 	}, false );
 
 	this.setFullScreen = function ( boolean ) {
 
 		if ( vrHMD === undefined ) return;
-		if ( isFullscreen === boolean ) return;
+		if ( isPresenting === boolean ) return;
 
-		if ( canvas.mozRequestFullScreen ) {
+		if ( !deprecatedAPI ) {
 
-			canvas.mozRequestFullScreen( { vrDisplay: vrHMD } );
+			if ( boolean ) {
 
-		} else if ( canvas.webkitRequestFullscreen ) {
+				vrHMD.requestPresent( { source: canvas } );
 
-			canvas.webkitRequestFullscreen( { vrDisplay: vrHMD } );
+			} else {
+
+				vrHMD.exitPresent();
+
+			}
+
+		} else {
+
+			if ( canvas.mozRequestFullScreen ) {
+
+				canvas.mozRequestFullScreen( { vrDisplay: vrHMD } );
+
+			} else if ( canvas.webkitRequestFullscreen ) {
+
+				canvas.webkitRequestFullscreen( { vrDisplay: vrHMD } );
+
+			} else {
+
+				console.error( 'No compatible requestFullscreen method found' );
+
+			}
 
 		}
 
 	};
+
+	this.requestPresent = function () {
+		this.setFullScreen( true );
+	};
+
+	this.exitPresent = function () {
+		this.setFullScreen( false );
+	};
+
+	//
+
+	var stereoTransformL = new THREE.Matrix4();
+	var stereoTransformR = new THREE.Matrix4();
+
+	function updateSeparationMatrices ( scale ) {
+
+		scale = scale || 1;
+
+		if ( vrHMD ) {
+
+			var eyeParamsL = vrHMD.getEyeParameters( 'left' );
+			var eyeParamsR = vrHMD.getEyeParameters( 'right' );
+			var eyeTransL;
+			var eyeTransR;
+
+			if ( !deprecatedAPI ) {
+
+				eyeTransL = eyeParamsL.offset;
+				eyeTransR = eyeParamsR.offset;
+				stereoTransformL.makeTranslation( scale * eyeTransL[0], scale * eyeTransL[1], scale * eyeTransL[2] );
+				stereoTransformR.makeTranslation( scale * eyeTransR[0], scale * eyeTransR[1], scale * eyeTransR[2] );
+
+			} else {
+
+				eyeTransL = eyeParamsL.eyeTranslation;
+				eyeTransR = eyeParamsR.eyeTranslation;
+				stereoTransformL.makeTranslation( scale * eyeTransL.x, scale * eyeTransL.y, scale * eyeTransL.z );
+				stereoTransformR.makeTranslation( scale * eyeTransR.x, scale * eyeTransR.y, scale * eyeTransR.z );
+
+			}
+
+		}
+
+	}
+
+	var _near = 0.1;
+	var _far = 2000;
+
+	function updateProjectionMatrices ( near, far ) {
+
+		near = near || _near;
+		far  = far  || _far;
+
+		if ( vrHMD ) {
+
+			var eyeParamsL = vrHMD.getEyeParameters( 'left'  );
+			var eyeParamsR = vrHMD.getEyeParameters( 'right'  );
+
+			var eyeFOVL;
+			var eyeFOVR;
+
+			if ( !deprecatedAPI ) {
+
+				eyeFOVL = eyeParamsL.fieldOfView;
+				eyeFOVR = eyeParamsR.fieldOfView;
+
+			} else {
+
+				eyeFOVL = eyeParamsL.recommendedFieldOfView;
+				eyeFOVR = eyeParamsR.recommendedFieldOfView;
+
+			}
+
+			cameraL.projectionMatrix = fovToProjection( eyeFOVL, true, near, far );
+			cameraR.projectionMatrix = fovToProjection( eyeFOVR, true, near, far );
+
+		}
+
+	}
 
 	// render
 
@@ -175,42 +232,27 @@ THREE.VREffect = function ( renderer, onError ) {
 
 			}
 
-			// not relying on WebVR renderRect atm, I'm having issues w/ Rift DK2:
-
-			// var renderRectL = vrHMD.getEyeParameters( 'left' ).renderRect;
-			// var renderRectR = vrHMD.getEyeParameters( 'right' ).renderRect;
-
-			// if ( renderRectL === undefined ) {
-
-			// 	renderRectL = { x: 0, y: 0, width: width, height: height };
-
-			// }
-
-			// if ( renderRectR === undefined ) {
-
-			// 	renderRectR = { x: width, y: 0, width: width, height: height };
-
-			// }
-
 			// render left eye
 
-			var renderRectL = { x: 0, y: 0, width: width, height: height };
-
-			renderer.setViewport( renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height );
-			renderer.setScissor(  renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height );
+			renderer.setViewport( 0, 0, width, height );
+			renderer.setScissor(  0, 0, width, height );
 			cameraL.matrixWorld.multiplyMatrices( camera.matrixWorld, stereoTransformL );
 			renderer.render( scene, cameraL );
 
 			// render right eye
 
-			var renderRectR = { x: width, y: 0, width: width, height: height };
-
-			renderer.setViewport( renderRectR.x, renderRectR.y, renderRectR.width, renderRectR.height );
-			renderer.setScissor(  renderRectR.x, renderRectR.y, renderRectR.width, renderRectR.height );
+			renderer.setViewport( width, 0, width, height );
+			renderer.setScissor(  width, 0, width, height );
 			cameraR.matrixWorld.multiplyMatrices( camera.matrixWorld, stereoTransformR );
 			renderer.render( scene, cameraR );
 
 			renderer.setScissorTest( false );
+
+			if ( isPresenting && !deprecatedAPI ) {
+
+				vrHMD.submitFrame();
+
+			}
 
 			if ( autoUpdate === true ) {
 
