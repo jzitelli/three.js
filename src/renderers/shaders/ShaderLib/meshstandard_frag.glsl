@@ -29,6 +29,7 @@ varying vec3 vViewPosition;
 #include <fog_pars_fragment>
 #include <bsdfs>
 #include <ambient_pars>
+#include <cube_uv_reflection_fragment>
 #include <lights_pars>
 #include <lights_standard_pars_fragment>
 #include <shadowmap_pars_fragment>
@@ -64,10 +65,8 @@ void main() {
 
 	vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveLight;
 
-	#include <linear_to_gamma_fragment>
+	gl_FragColor = linearToOutputTexel( vec4( outgoingLight, diffuseColor.a ) );
 
 	#include <fog_fragment>
-
-	gl_FragColor = vec4( outgoingLight, diffuseColor.a );
 
 }
