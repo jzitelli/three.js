@@ -7,40 +7,42 @@ THREE.WebGLProgram = ( function () {
 	var arrayStructRe = /^([\w\d_]+)\[(\d+)\]\.([\w\d_]+)$/;
 	var arrayRe = /^([\w\d_]+)\[0\]$/;
 
-	function getTexelDecodingFunction( functionName, encoding ) {
-
-		var code = "vec4 " + functionName + "( vec4 value ) { return ";
+	function getEncodingComponents( encoding ) {
 
 		switch ( encoding ) {
 
 			case THREE.LinearEncoding:
-				code += "value";
-				break;
+				return [ 'Linear','( value )' ];
 			case THREE.sRGBEncoding:
-				code += "sRGBToLinear( value )";
-				break;
+				return [ 'sRGB','( value )' ];
 			case THREE.RGBEEncoding:
-				code += "RGBEToLinear( value )";
-				break;
+				return [ 'RGBE','( value )' ];
 			case THREE.RGBM7Encoding:
-				code += "RGBMToLinear( value, 7.0 )";
-				break;
+				return [ 'RGBM','( value, 7.0 )' ];
 			case THREE.RGBM16Encoding:
-				code += "RGBMToLinear( value, 16.0 )";
-				break;
+				return [ 'RGBM','( value, 16.0 )' ];
 			case THREE.RGBDEncoding:
-				code += "RGBDToLinear( value, 256.0 )";
-				break;
+				return [ 'RGBD','( value, 256.0 )' ];
 			case THREE.GammaEncoding:
-				code += "GammaToLinear( value, float( GAMMA_FACTOR ) )";
-				break;
+				return [ 'Gamma','( value, float( GAMMA_FACTOR ) )' ];
 			default:
 				throw new Error( 'unsupported encoding: ' + encoding );
 
 		}
 
-		code += "; }";
-		return code;
+	}
+
+	function getTexelDecodingFunction( functionName, encoding ) {
+
+		var components = getEncodingComponents( encoding );
+		return "vec4 " + functionName + "( vec4 value ) { return " + components[ 0 ] + "ToLinear" + components[ 1 ] + "; }";
+
+	}
+
+	function getTexelEncodingFunction( functionName, encoding ) {
+
+		var components = getEncodingComponents( encoding );
+		return "vec4 " + functionName + "( vec4 value ) { return LinearTo" + components[ 0 ] + components[ 1 ] + "; }";
 
 	}
 
@@ -49,7 +51,7 @@ THREE.WebGLProgram = ( function () {
 		extensions = extensions || {};
 
 		var chunks = [
-			( extensions.derivatives || parameters.bumpMap || parameters.normalMap || parameters.flatShading ) ? '#extension GL_OES_standard_derivatives : enable' : '',
+			( extensions.derivatives || parameters.envMapCubeUV || parameters.bumpMap || parameters.normalMap || parameters.flatShading ) ? '#extension GL_OES_standard_derivatives : enable' : '',
 			( extensions.fragDepth || parameters.logarithmicDepthBuffer ) && rendererExtensions.get( 'EXT_frag_depth' ) ? '#extension GL_EXT_frag_depth : enable' : '',
 			( extensions.drawBuffers ) && rendererExtensions.get( 'WEBGL_draw_buffers' ) ? '#extension GL_EXT_draw_buffers : require' : '',
 			( extensions.shaderTextureLOD || parameters.envMap ) && rendererExtensions.get( 'EXT_shader_texture_lod' ) ? '#extension GL_EXT_shader_texture_lod : enable' : '',
@@ -277,6 +279,11 @@ THREE.WebGLProgram = ( function () {
 					envMapTypeDefine = 'ENVMAP_TYPE_CUBE';
 					break;
 
+				case THREE.CubeUVReflectionMapping:
+				case THREE.CubeUVRefractionMapping:
+					envMapTypeDefine = 'ENVMAP_TYPE_CUBE_UV';
+					break;
+
 				case THREE.EquirectangularReflectionMapping:
 				case THREE.EquirectangularRefractionMapping:
 					envMapTypeDefine = 'ENVMAP_TYPE_EQUIREC';
@@ -349,8 +356,6 @@ THREE.WebGLProgram = ( function () {
 
 				parameters.supportsVertexTextures ? '#define VERTEX_TEXTURES' : '',
 
-				renderer.gammaInput ? '#define GAMMA_INPUT' : '',
-				renderer.gammaOutput ? '#define GAMMA_OUTPUT' : '',
 				'#define GAMMA_FACTOR ' + gammaFactorDefine,
 
 				'#define MAX_BONES ' + parameters.maxBones,
@@ -456,8 +461,6 @@ THREE.WebGLProgram = ( function () {
 
 				parameters.alphaTest ? '#define ALPHATEST ' + parameters.alphaTest : '',
 
-				renderer.gammaInput ? '#define GAMMA_INPUT' : '',
-				renderer.gammaOutput ? '#define GAMMA_OUTPUT' : '',
 				'#define GAMMA_FACTOR ' + gammaFactorDefine,
 
 				( parameters.useFog && parameters.fog ) ? '#define USE_FOG' : '',
@@ -496,11 +499,12 @@ THREE.WebGLProgram = ( function () {
 				'uniform mat4 viewMatrix;',
 				'uniform vec3 cameraPosition;',
 
-				( parameters.mapEncoding || parameters.envMapEncoding || parameters.emissiveMapEncoding ) ? THREE.ShaderChunk[ 'encodings' ] : '',
+				( parameters.outputEncoding || parameters.mapEncoding || parameters.envMapEncoding || parameters.emissiveMapEncoding ) ? THREE.ShaderChunk[ 'encodings' ] : '',
 
 				parameters.mapEncoding ? getTexelDecodingFunction( 'mapTexelToLinear', parameters.mapEncoding ) : '',
 				parameters.envMapEncoding ? getTexelDecodingFunction( 'envMapTexelToLinear', parameters.envMapEncoding ) : '',
 				parameters.emissiveMapEncoding ? getTexelDecodingFunction( 'emissiveMapTexelToLinear', parameters.emissiveMapEncoding ) : '',
+				parameters.outputEncoding ? getTexelEncodingFunction( "linearToOutputTexel", parameters.outputEncoding ) : '',
 
 				'\n'
 
