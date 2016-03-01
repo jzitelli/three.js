@@ -47,6 +47,7 @@ THREE.VREffect = function ( renderer, onError ) {
 		}
 
 		updateSeparationMatrices();
+		updateProjectionMatrices();
 
 	}
 
@@ -207,6 +208,27 @@ THREE.VREffect = function ( renderer, onError ) {
 
 		if ( vrHMD ) {
 
+			if ( _near !== camera.near || _far !== camera.far ) {
+
+				_near = camera.near;
+				_far  = camera.far;
+				updateProjectionMatrices( camera.near, camera.far );
+
+			}
+
+			// not working for me on DK2:
+			// var eyeParamsL = vrHMD.getEyeParameters( 'left' );
+			// var eyeParamsR = vrHMD.getEyeParameters( 'right' );
+			// var width = Math.max(eyeParamsL.renderWidth, eyeParamsR.renderWidth);
+			// var height = Math.max(eyeParamsL.renderHeight, eyeParamsR.renderHeight);
+
+			var size = renderer.getSize();
+			var width  = size.width / 2;
+			var height = size.height;
+
+			renderer.setScissorTest( true );
+			renderer.clear();
+
 			var autoUpdate;
 
 			if ( scene.autoUpdate === true ) {
@@ -217,22 +239,7 @@ THREE.VREffect = function ( renderer, onError ) {
 
 			}
 
-			var size = renderer.getSize();
-			var width  = size.width / 2;
-			var height = size.height;
-
-			renderer.setScissorTest( true );
-			renderer.clear();
-
 			if ( camera.parent === null ) camera.updateMatrixWorld();
-
-			if ( _near !== camera.near || _far !== camera.far ) {
-
-				_near = camera.near;
-				_far  = camera.far;
-				updateProjectionMatrices( camera.near, camera.far );
-
-			}
 
 			// render left eye
 
@@ -250,15 +257,15 @@ THREE.VREffect = function ( renderer, onError ) {
 
 			renderer.setScissorTest( false );
 
-			if ( isPresenting && !deprecatedAPI ) {
-
-				vrHMD.submitFrame();
-
-			}
-
 			if ( autoUpdate === true ) {
 
 				scene.autoUpdate = true;
+
+			}
+
+			if ( isPresenting && !deprecatedAPI ) {
+
+				vrHMD.submitFrame();
 
 			}
 

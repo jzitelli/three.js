@@ -7,7 +7,7 @@ THREE.VRControls = function ( object, onError ) {
 
 	var scope = this;
 
-	var vrInputs = [];
+	var vrInput;
 
 	var deprecatedAPI = false;
 
@@ -19,15 +19,17 @@ THREE.VRControls = function ( object, onError ) {
 
 			if ( devices[ i ] instanceof deviceClass ) {
 
-				vrInputs.push( devices[ i ] );
+				vrInput = devices[ i ];
+
+				break;
 
 			}
 
 		}
 
-		if ( vrInputs.length === 0 ) {
+		if ( !vrInput ) {
 
-			if ( onError ) onError( 'VR inputs not available' );
+			if ( onError ) onError( 'VR input not available' );
 
 		}
 
@@ -53,9 +55,7 @@ THREE.VRControls = function ( object, onError ) {
 
 	this.update = function () {
 
-		for ( var i = 0; i < vrInputs.length; i ++ ) {
-
-			var vrInput = vrInputs[ i ];
+		if ( vrInput ) {
 
 			if ( vrInput.getPose ) {
 
@@ -98,28 +98,16 @@ THREE.VRControls = function ( object, onError ) {
 
 	this.resetSensor = function () {
 
-		for ( var i = 0; i < vrInputs.length; i ++ ) {
+		if ( vrInput.resetPose !== undefined ) {
 
-			var vrInput = vrInputs[ i ];
+			vrInput.resetPose();
 
-			if ( vrInput.resetPose !== undefined ) {
+		} else if ( vrInput.resetSensor !== undefined ) {
 
-				vrInput.resetPose();
-
-			} else if ( vrInput.resetSensor !== undefined ) {
-
-				// Deprecated API.
-				vrInput.resetSensor();
-
-			}
+			// Deprecated API.
+			vrInput.resetSensor();
 
 		}
-
-	};
-
-	this.dispose = function () {
-
-		vrInputs = [];
 
 	};
 
