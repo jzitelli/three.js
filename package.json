@@ -51,6 +51,8 @@
     "examples/textures/sprites/",
     "examples/fonts/helvetiker_regular.typeface.js",
     "examples/fonts/helvetiker_bold.typeface.js",
-    "build/"
+    "build/",
+    "src/",
+    "utils/"
   ]
 }
