@@ -124,11 +124,15 @@ THREE.VREffect = function ( renderer, onError ) {
 	};
 
 	this.requestPresent = function () {
-		this.setFullScreen( true );
+
+		return vrHMD.requestPresent( { source: canvas } );
+
 	};
 
 	this.exitPresent = function () {
-		this.setFullScreen( false );
+
+		return vrHMD.exitPresent();
+
 	};
 
 	//
