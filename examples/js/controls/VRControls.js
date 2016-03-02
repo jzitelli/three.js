@@ -9,19 +9,15 @@ THREE.VRControls = function ( object, onError ) {
 
 	var vrInput;
 
-	var deprecatedAPI = false;
-
 	function gotVRDevices( devices ) {
-
-		var deviceClass = deprecatedAPI ? PositionSensorVRDevice : VRDisplay;
 
 		for ( var i = 0; i < devices.length; i ++ ) {
 
-			if ( devices[ i ] instanceof deviceClass ) {
+			if ( ( 'VRDisplay' in window && devices[ i ] instanceof VRDisplay ) ||
+				 ( 'PositionSensorVRDevice' in window && devices[ i ] instanceof PositionSensorVRDevice ) ) {
 
 				vrInput = devices[ i ];
-
-				break;
+				break;  // We keep the first we encounter
 
 			}
 
@@ -29,7 +25,7 @@ THREE.VRControls = function ( object, onError ) {
 
 		if ( !vrInput ) {
 
-			if ( onError ) onError( 'VR input not available' );
+			if ( onError ) onError( 'VR input not available.' );
 
 		}
 
@@ -42,7 +38,6 @@ THREE.VRControls = function ( object, onError ) {
 	} else if ( navigator.getVRDevices ) {
 
 		// Deprecated API.
-		deprecatedAPI = true;
 		navigator.getVRDevices().then( gotVRDevices );
 
 	}
@@ -98,16 +93,38 @@ THREE.VRControls = function ( object, onError ) {
 
 	this.resetSensor = function () {
 
-		if ( vrInput.resetPose !== undefined ) {
+		if ( vrInput ) {
 
-			vrInput.resetPose();
+			if ( vrInput.resetPose !== undefined ) {
 
-		} else if ( vrInput.resetSensor !== undefined ) {
+				vrInput.resetPose();
 
-			// Deprecated API.
-			vrInput.resetSensor();
+			} else if ( vrInput.resetSensor !== undefined ) {
+
+				// Deprecated API.
+				vrInput.resetSensor();
+
+			} else if ( vrInput.zeroSensor !== undefined ) {
+
+				// Really deprecated API.
+				vrInput.zeroSensor();
+
+			}
 
 		}
+
+	};
+
+	this.zeroSensor = function () {
+
+		console.warn( 'THREE.VRControls: .zeroSensor() is now .resetSensor().' );
+		this.resetSensor();
+
+	};
+
+	this.dispose = function () {
+
+		vrInput = null;
 
 	};
 
