@@ -158,9 +158,11 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	var cameraL = new THREE.PerspectiveCamera();
 	cameraL.layers.enable( 1 );
+	cameraL.matrixAutoUpdate = true;
 
 	var cameraR = new THREE.PerspectiveCamera();
 	cameraR.layers.enable( 2 );
+	cameraR.matrixAutoUpdate = true;
 
 	this.render = function ( scene, camera ) {
 
