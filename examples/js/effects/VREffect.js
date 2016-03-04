@@ -111,6 +111,11 @@ THREE.VREffect = function ( renderer, onError ) {
 						updateTranslationMatrices();
 						resolve();
 
+					} ).catch( function (error) {
+
+						console.error( 'An error occurred during requestPresent: ' + error );
+						reject( new Error( 'An error occurred during requestPresent: ' + error ) );
+
 					} );
 
 				} else {
