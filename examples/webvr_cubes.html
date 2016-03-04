@@ -99,7 +99,7 @@
 
 				var geometry = new THREE.BoxGeometry( 20, 20, 20 );
 
-				for ( var i = 0; i < 2000; i ++ ) {
+				for ( var i = 0; i < 400; i ++ ) {
 
 					var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
 
@@ -169,7 +169,7 @@
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
 
-				vrEffect.setSize( window.innerWidth, window.innerHeight );
+				renderer.setSize( window.innerWidth, window.innerHeight );
 
 			}
 
@@ -224,8 +224,7 @@
 						INTERSECTED.geometry.boundingSphere.radius + 5
 					);
 
-				}
-				else {
+				} else {
 
 					crosshair.translateZ(-40);
 
