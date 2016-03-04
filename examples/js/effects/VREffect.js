@@ -42,11 +42,6 @@ THREE.VREffect = function ( renderer, onError ) {
 
 			if ( onError ) onError( 'HMD not available' );
 
-		} else {
-
-			updateProjectionMatrices();
-			updateTranslationMatrices();
-
 		}
 
 	}
@@ -110,7 +105,13 @@ THREE.VREffect = function ( renderer, onError ) {
 
 				if ( boolean ) {
 
-					resolve( vrHMD.requestPresent( { source: canvas } ) );
+					vrHMD.requestPresent( { source: canvas } ).then( function () {
+
+						updateProjectionMatrices();
+						updateTranslationMatrices();
+						resolve();
+
+					} );
 
 				} else {
 
@@ -175,27 +176,23 @@ THREE.VREffect = function ( renderer, onError ) {
 		near = near || _near;
 		far  = far  || _far;
 
-		if ( vrHMD ) {
+		var eyeParamsL = vrHMD.getEyeParameters( 'left' );
+		var eyeParamsR = vrHMD.getEyeParameters( 'right' );
 
-			var eyeParamsL = vrHMD.getEyeParameters( 'left' );
-			var eyeParamsR = vrHMD.getEyeParameters( 'right' );
+		if ( !deprecatedAPI ) {
 
-			if ( !deprecatedAPI ) {
+			eyeFOVL = eyeParamsL.fieldOfView;
+			eyeFOVR = eyeParamsR.fieldOfView;
 
-				eyeFOVL = eyeParamsL.fieldOfView;
-				eyeFOVR = eyeParamsR.fieldOfView;
+		} else {
 
-			} else {
-
-				eyeFOVL = eyeParamsL.recommendedFieldOfView;
-				eyeFOVR = eyeParamsR.recommendedFieldOfView;
-
-			}
-
-			cameraL.projectionMatrix = fovToProjection( eyeFOVL, true, near, far );
-			cameraR.projectionMatrix = fovToProjection( eyeFOVR, true, near, far );
+			eyeFOVL = eyeParamsL.recommendedFieldOfView;
+			eyeFOVR = eyeParamsR.recommendedFieldOfView;
 
 		}
+
+		cameraL.projectionMatrix = fovToProjection( eyeFOVL, true, near, far );
+		cameraR.projectionMatrix = fovToProjection( eyeFOVR, true, near, far );
 
 	}
 
@@ -203,31 +200,27 @@ THREE.VREffect = function ( renderer, onError ) {
 
 		scale = scale || 1;
 
-		if ( vrHMD ) {
+		var eyeParamsL = vrHMD.getEyeParameters( 'left' );
+		var eyeParamsR = vrHMD.getEyeParameters( 'right' );
 
-			var eyeParamsL = vrHMD.getEyeParameters( 'left' );
-			var eyeParamsR = vrHMD.getEyeParameters( 'right' );
+		var eyeTransL;
+		var eyeTransR;
 
-			var eyeTransL;
-			var eyeTransR;
+		if ( !deprecatedAPI ) {
 
-			if ( !deprecatedAPI ) {
+			eyeTransL = eyeParamsL.offset;
+			eyeTransR = eyeParamsR.offset;
 
-				eyeTransL = eyeParamsL.offset;
-				eyeTransR = eyeParamsR.offset;
+			eyeMatrixL.makeTranslation( scale * eyeTransL[0], scale * eyeTransL[1], scale * eyeTransL[2] );
+			eyeMatrixR.makeTranslation( scale * eyeTransR[0], scale * eyeTransR[1], scale * eyeTransR[2] );
 
-				eyeMatrixL.makeTranslation( scale * eyeTransL[0], scale * eyeTransL[1], scale * eyeTransL[2] );
-				eyeMatrixR.makeTranslation( scale * eyeTransR[0], scale * eyeTransR[1], scale * eyeTransR[2] );
+		} else {
 
-			} else {
+			eyeTransL = eyeParamsL.eyeTranslation;
+			eyeTransR = eyeParamsR.eyeTranslation;
 
-				eyeTransL = eyeParamsL.eyeTranslation;
-				eyeTransR = eyeParamsR.eyeTranslation;
-
-				eyeMatrixL.makeTranslation( scale * eyeTransL.x, scale * eyeTransL.y, scale * eyeTransL.z );
-				eyeMatrixR.makeTranslation( scale * eyeTransR.x, scale * eyeTransR.y, scale * eyeTransR.z );
-
-			}
+			eyeMatrixL.makeTranslation( scale * eyeTransL.x, scale * eyeTransL.y, scale * eyeTransL.z );
+			eyeMatrixR.makeTranslation( scale * eyeTransR.x, scale * eyeTransR.y, scale * eyeTransR.z );
 
 		}
 
