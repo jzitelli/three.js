@@ -107,7 +107,7 @@ THREE.ObjectLoader.prototype = {
 					case 'BoxGeometry':
 					case 'CubeGeometry': // backwards compatible
 
-						geometry = new THREE[ data.type === 'CubeGeometry' ? 'BoxGeometry' : data.type ](
+						geometry = new THREE[ data.type ](
 							data.width,
 							data.height,
 							data.depth,
@@ -118,8 +118,8 @@ THREE.ObjectLoader.prototype = {
 
 						break;
 
-					case 'CircleBufferGeometry':
 					case 'CircleGeometry':
+					case 'CircleBufferGeometry':
 
 						geometry = new THREE[ data.type ](
 							data.radius,
@@ -131,8 +131,9 @@ THREE.ObjectLoader.prototype = {
 						break;
 
 					case 'CylinderGeometry':
+					case 'CylinderBufferGeometry':
 
-						geometry = new THREE.CylinderGeometry(
+						geometry = new THREE[ data.type ](
 							data.radiusTop,
 							data.radiusBottom,
 							data.height,
@@ -210,8 +211,9 @@ THREE.ObjectLoader.prototype = {
 						break;
 
 					case 'TorusGeometry':
+					case 'TorusBufferGeometry':
 
-						geometry = new THREE.TorusGeometry(
+						geometry = new THREE[ data.type ](
 							data.radius,
 							data.tube,
 							data.radialSegments,
@@ -609,7 +611,7 @@ THREE.ObjectLoader.prototype = {
 
 			return object;
 
-		}
+		};
 
 	}()
 
