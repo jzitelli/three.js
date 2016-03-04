@@ -42,6 +42,11 @@ THREE.VREffect = function ( renderer, onError ) {
 
 			if ( onError ) onError( 'HMD not available' );
 
+		} else {
+
+			updateProjectionMatrices();
+			updateTranslationMatrices();
+
 		}
 
 	}
