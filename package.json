@@ -9,9 +9,8 @@
     "test": "test"
   },
   "scripts": {
-    "build": "cd ./utils/build && node build.js --include common --include extras && node build.js --include common --include extras --minify --output ../../build/three.min.js && cd ../..",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublish": "cd ./utils/build && node build.js --include common --include extras && node build.js --include common --include extras --minify --output ../../build/three.min.js && cd ../.."
+    "build": "cd ./utils/build && node build.js --include common --include extras && node build.js --include common --include extras --minify --output ../../build/three.min.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
