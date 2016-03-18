@@ -86,6 +86,13 @@ THREE.VREffect = function ( renderer, onError ) {
 
 		isPresenting = vrHMD && vrHMD.isPresenting;
 
+		if (!isPresenting) {
+
+			var size = renderer.getSize();
+			renderer.setViewport( 0, 0, size.width, size.height );
+
+		}
+
 	}, false );
 
 	this.setFullScreen = function ( boolean ) {
@@ -120,13 +127,7 @@ THREE.VREffect = function ( renderer, onError ) {
 
 				} else {
 
-					vrHMD.exitPresent().then( function () {
-
-						var size = renderer.getSize();
-						renderer.setViewport( 0, 0, size.width, size.height );
-						resolve();
-
-					} );
+					resolve( vrHMD.exitPresent() );
 
 				}
 
