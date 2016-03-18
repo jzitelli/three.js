@@ -120,7 +120,13 @@ THREE.VREffect = function ( renderer, onError ) {
 
 				} else {
 
-					resolve( vrHMD.exitPresent() );
+					vrHMD.exitPresent().then( function () {
+
+						var size = renderer.getSize();
+						renderer.setViewport( 0, 0, size.width, size.height );
+						resolve();
+
+					} );
 
 				}
 
