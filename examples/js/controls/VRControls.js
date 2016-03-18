@@ -101,7 +101,7 @@ THREE.VRControls = function ( object, onError ) {
 
 	};
 
-	this.resetSensor = function () {
+	this.resetPose = function () {
 
 		if ( vrInput ) {
 
@@ -125,10 +125,17 @@ THREE.VRControls = function ( object, onError ) {
 
 	};
 
+	this.resetSensor = function () {
+
+		console.warn( 'THREE.VRControls: .resetSensor() is now .resetPose().' );
+		this.resetPose();
+
+	};
+
 	this.zeroSensor = function () {
 
-		console.warn( 'THREE.VRControls: .zeroSensor() is now .resetSensor().' );
-		this.resetSensor();
+		console.warn( 'THREE.VRControls: .zeroSensor() is now .resetPose().' );
+		this.resetPose();
 
 	};
 
