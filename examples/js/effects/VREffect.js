@@ -91,13 +91,18 @@ THREE.VREffect = function ( renderer, onError ) {
 			var size = renderer.getSize();
 			renderer.setViewport( 0, 0, size.width, size.height );
 
+		} else {
+
+			updateProjectionMatrices();
+			updateTranslationMatrices();
+
 		}
 
 	}, false );
 
 	this.setFullScreen = function ( boolean ) {
 
-		return new Promise(function(resolve, reject) {
+		return new Promise( function ( resolve, reject ) {
 
 			if ( vrHMD === undefined ) {
 				reject( new Error( 'No VR hardware found.' ) );
@@ -112,26 +117,13 @@ THREE.VREffect = function ( renderer, onError ) {
 
 				if ( boolean ) {
 
-					vrHMD.requestPresent( { source: canvas } ).then( function () {
-
-						updateProjectionMatrices();
-						updateTranslationMatrices();
-						resolve();
-
-					} ).catch( function (error) {
-
-						console.error( 'An error occurred during requestPresent: ' + error );
-						reject( new Error( 'An error occurred during requestPresent: ' + error ) );
-
-					} );
+					resolve( vrHMD.requestPresent( { source: canvas } ) );
 
 				} else {
 
 					resolve( vrHMD.exitPresent() );
 
 				}
-
-				return;
 
 			} else {
 
@@ -157,7 +149,7 @@ THREE.VREffect = function ( renderer, onError ) {
 
 			}
 
-		});
+		} );
 
 	};
 
