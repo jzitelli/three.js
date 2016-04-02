@@ -9,7 +9,7 @@
  *
  */
 
-THREE.VREffect = function ( renderer, onError ) {
+THREE.VREffect = function ( renderer, onError, vrCanvas ) {
 
 	var vrHMD;
 	var deprecatedAPI = false;
@@ -70,6 +70,9 @@ THREE.VREffect = function ( renderer, onError ) {
 	var isPresenting = false;
 
 	var canvas = renderer.domElement;
+
+	vrCanvas = vrCanvas || canvas;
+
 	var fullscreenchange = canvas.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange';
 
 	document.addEventListener( fullscreenchange, function () {
@@ -112,7 +115,7 @@ THREE.VREffect = function ( renderer, onError ) {
 
 				if ( boolean ) {
 
-					vrHMD.requestPresent( { source: canvas } ).then( function () {
+					vrHMD.requestPresent( { source: vrCanvas } ).then( function () {
 
 						updateProjectionMatrices();
 						updateTranslationMatrices();
@@ -184,7 +187,7 @@ THREE.VREffect = function ( renderer, onError ) {
 	cameraR.matrixAutoUpdate = false;
 
 	var _near = 0.1;
-	var _far = 2000;
+	var _far = 1000;
 
 	function updateProjectionMatrices( near, far ) {
 
