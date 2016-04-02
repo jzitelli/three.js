@@ -5,6 +5,7 @@ var files = {
 		"webgl_animation_skinning_blending",
 		"webgl_animation_skinning_morph",
 		"webgl_camera",
+		"webgl_camera_cinematic",
 		"webgl_camera_logarithmicdepthbuffer",
 		"webgl_decals",
 		"webgl_effects_anaglyph",
@@ -239,7 +240,8 @@ var files = {
 		"webvr_panorama",
 		"webvr_rollercoaster",
 		"webvr_shadow",
-		"webvr_video"
+		"webvr_video",
+		"webvr_vive"
 	],
 	"css3d": [
 		"css3d_molecules",
