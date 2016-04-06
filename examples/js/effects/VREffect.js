@@ -87,9 +87,6 @@ THREE.VREffect = function ( renderer, onError ) {
 
 		if ( isPresenting ) {
 
-			updateProjectionMatrices();
-			updateTranslationMatrices();
-
 			// rendererPixelRatio = renderer.getPixelRatio();
 			// rendererSize = renderer.getSize();
 
@@ -165,6 +162,9 @@ THREE.VREffect = function ( renderer, onError ) {
 				}
 
 			} else {
+
+				updateProjectionMatrices();
+				updateTranslationMatrices();
 
 				if ( canvas.mozRequestFullScreen ) {
 
