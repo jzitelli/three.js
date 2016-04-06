@@ -12,7 +12,7 @@
 THREE.VREffect = function ( renderer, onError ) {
 
 	var vrHMD;
-	var isDeprecatedAPI = false;
+	var deprecatedAPI = false;
 	var eyeMatrixL = new THREE.Matrix4();
 	var eyeMatrixR = new THREE.Matrix4();
 	var renderRectL, renderRectR;
@@ -25,13 +25,13 @@ THREE.VREffect = function ( renderer, onError ) {
 			if ( 'VRDisplay' in window && devices[ i ] instanceof VRDisplay ) {
 
 				vrHMD = devices[ i ];
-				isDeprecatedAPI = false;
+				deprecatedAPI = false;
 				break; // We keep the first we encounter
 
 			} else if ( 'HMDVRDevice' in window && devices[ i ] instanceof HMDVRDevice ) {
 
 				vrHMD = devices[ i ];
-				isDeprecatedAPI = true;
+				deprecatedAPI = true;
 				break; // We keep the first we encounter
 
 			}
@@ -40,12 +40,7 @@ THREE.VREffect = function ( renderer, onError ) {
 
 		if ( vrHMD === undefined ) {
 
-			if ( onError ) {
-
-				if ( isDeprecatedAPI ) onError( 'HMDVRDevice not available' );
-				else onError( 'VRDisplay not available' )
-
-			}
+			if ( onError ) onError( 'HMD not available' );
 
 		}
 
@@ -59,10 +54,6 @@ THREE.VREffect = function ( renderer, onError ) {
 
 		// Deprecated API.
 		navigator.getVRDevices().then( gotVRDevices );
-
-	} else {
-
-		throw new Error( 'WebVR is not supported on this platform' );
 
 	}
 
@@ -79,25 +70,14 @@ THREE.VREffect = function ( renderer, onError ) {
 	var isPresenting = false;
 
 	var canvas = renderer.domElement;
+
 	var fullscreenchange = canvas.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange';
 
 	document.addEventListener( fullscreenchange, function () {
 
-		isPresenting = isDeprecatedAPI && vrHMD && ( document.mozFullScreenElement || document.webkitFullscreenElement ) !== undefined;
+		if ( vrHMD && deprecatedAPI ) {
 
-		if ( isPresenting ) {
-
-			// rendererPixelRatio = renderer.getPixelRatio();
-			// rendererSize = renderer.getSize();
-
-			// var eyeParamsL = vrHMD.getEyeParameters( 'left' );
-			// renderer.setPixelRatio( 1 );
-			// renderer.setSize( eyeParamsL.renderRect.width * 2, eyeParamsL.renderRect.height, false );
-
-		} else {
-
-			// renderer.setPixelRatio( rendererPixelRatio );
-			// renderer.setSize( rendererSize.width, rendererSize.height );
+			isPresenting = document.mozFullScreenElement || document.webkitFullscreenElement;
 
 		}
 
@@ -126,19 +106,15 @@ THREE.VREffect = function ( renderer, onError ) {
 		return new Promise( function ( resolve, reject ) {
 
 			if ( vrHMD === undefined ) {
-
 				reject( new Error( 'No VR hardware found.' ) );
 				return;
-
 			}
 			if ( isPresenting === boolean ) {
-
 				resolve();
 				return;
-
 			}
 
-			if ( !isDeprecatedAPI ) {
+			if ( !deprecatedAPI ) {
 
 				if ( boolean ) {
 
@@ -222,7 +198,7 @@ THREE.VREffect = function ( renderer, onError ) {
 		var eyeParamsL = vrHMD.getEyeParameters( 'left' );
 		var eyeParamsR = vrHMD.getEyeParameters( 'right' );
 
-		if ( !isDeprecatedAPI ) {
+		if ( !deprecatedAPI ) {
 
 			eyeFOVL = eyeParamsL.fieldOfView;
 			eyeFOVR = eyeParamsR.fieldOfView;
@@ -249,7 +225,7 @@ THREE.VREffect = function ( renderer, onError ) {
 		var eyeTransL;
 		var eyeTransR;
 
-		if ( !isDeprecatedAPI ) {
+		if ( !deprecatedAPI ) {
 
 			eyeTransL = eyeParamsL.offset;
 			eyeTransR = eyeParamsR.offset;
@@ -328,7 +304,7 @@ THREE.VREffect = function ( renderer, onError ) {
 
 			}
 
-			if ( !isDeprecatedAPI ) {
+			if ( !deprecatedAPI ) {
 
 				vrHMD.submitFrame();
 
