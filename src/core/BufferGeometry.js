@@ -560,16 +560,13 @@ THREE.BufferGeometry.prototype = {
 
 		var positions = this.attributes.position.array;
 
-		if ( positions ) {
+		if ( positions !== undefined ) {
 
 			this.boundingBox.setFromArray( positions );
 
-		}
+		} else {
 
-		if ( positions === undefined || positions.length === 0 ) {
-
-			this.boundingBox.min.set( 0, 0, 0 );
-			this.boundingBox.max.set( 0, 0, 0 );
+			this.boundingBox.makeEmpty();
 
 		}
 
@@ -586,7 +583,7 @@ THREE.BufferGeometry.prototype = {
 		var box = new THREE.Box3();
 		var vector = new THREE.Vector3();
 
-		return function () {
+		return function computeBoundingSphere() {
 
 			if ( this.boundingSphere === null ) {
 
@@ -921,7 +918,8 @@ THREE.BufferGeometry.prototype = {
 			data.data.attributes[ key ] = {
 				itemSize: attribute.itemSize,
 				type: attribute.array.constructor.name,
-				array: array
+				array: array,
+				normalized: attribute.normalized
 			};
 
 		}
