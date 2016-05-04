@@ -71,26 +71,18 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	var canvas = renderer.domElement;
 
-	var fullscreenchange = canvas.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange';
+	var requestFullscreen;
+	var exitFullscreen;
+	var fullscreenElement;
 
-	document.addEventListener( fullscreenchange, function () {
+	function onFullscreenChange () {
 
-		if ( vrHMD && deprecatedAPI ) {
+		var wasPresenting = isPresenting;
+		isPresenting = vrHMD !== undefined && ( vrHMD.isPresenting || ( isDeprecatedAPI && document[ fullscreenElement ] instanceof window.HTMLElement ) );
 
-			isPresenting = document.mozFullScreenElement || document.webkitFullscreenElement;
+		if ( wasPresenting === isPresenting ) {
 
-		}
-
-	}, false );
-
-	window.addEventListener( 'vrdisplaypresentchange', function () {
-
-		isPresenting = vrHMD && vrHMD.isPresenting;
-
-		if (!isPresenting) {
-
-			var size = renderer.getSize();
-			renderer.setViewport( 0, 0, size.width, size.height );
+			return;
 
 		} else {
 
@@ -99,7 +91,32 @@ THREE.VREffect = function ( renderer, onError ) {
 
 		}
 
-	}, false );
+	}
+
+	if ( canvas.requestFullscreen ) {
+
+		requestFullscreen = 'requestFullscreen';
+		fullscreenElement = 'fullscreenElement';
+		exitFullscreen = 'exitFullscreen';
+		document.addEventListener( 'fullscreenchange', onFullscreenChange, false );
+
+	} else if ( canvas.mozRequestFullScreen ) {
+
+		requestFullscreen = 'mozRequestFullScreen';
+		fullscreenElement = 'mozFullScreenElement';
+		exitFullscreen = 'mozCancelFullScreen';
+		document.addEventListener( 'mozfullscreenchange', onFullscreenChange, false );
+
+	} else {
+
+		requestFullscreen = 'webkitRequestFullscreen';
+		fullscreenElement = 'webkitFullscreenElement';
+		exitFullscreen = 'webkitExitFullscreen';
+		document.addEventListener( 'webkitfullscreenchange', onFullscreenChange, false );
+
+	}
+
+	window.addEventListener( 'vrdisplaypresentchange', onFullscreenChange, false );
 
 	this.setFullScreen = function ( boolean ) {
 
@@ -142,14 +159,9 @@ THREE.VREffect = function ( renderer, onError ) {
 				updateProjectionMatrices();
 				updateTranslationMatrices();
 
-				if ( canvas.mozRequestFullScreen ) {
+				if ( canvas[ requestFullscreen ] ) {
 
-					canvas.mozRequestFullScreen( { vrDisplay: vrHMD } );
-					resolve();
-
-				} else if ( canvas.webkitRequestFullscreen ) {
-
-					canvas.webkitRequestFullscreen( { vrDisplay: vrHMD } );
+					canvas[ boolean ? requestFullscreen : exitFullscreen ]( { vrDisplay: vrHMD } );
 					resolve();
 
 				} else {
@@ -255,13 +267,6 @@ THREE.VREffect = function ( renderer, onError ) {
 
 				scene.updateMatrixWorld();
 				scene.autoUpdate = false;
-
-			}
-
-			if ( Array.isArray( scene ) ) {
-
-				console.warn( 'THREE.VREffect.render() no longer supports arrays. Use object.layers instead.' );
-				scene = scene[ 0 ];
 
 			}
 
