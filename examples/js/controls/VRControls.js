@@ -58,7 +58,7 @@ THREE.VRControls = function ( object, onError ) {
 	// standing=true but the VRDisplay doesn't provide stageParameters.
 	this.userHeight = 1.6;
 
-	this.update = function ( immediate ) {
+	this.update = function ( useImmediatePose ) {
 
 		if ( vrInput ) {
 
@@ -66,7 +66,7 @@ THREE.VRControls = function ( object, onError ) {
 
 				var pose;
 
-				if ( immediate && vrInput.getImmediatePose ) {
+				if ( useImmediatePose && vrInput.getImmediatePose ) {
 
 					pose = vrInput.getImmediatePose();
 
