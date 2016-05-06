@@ -80,14 +80,16 @@ THREE.VREffect = function ( renderer, onError ) {
 		var wasPresenting = isPresenting;
 		isPresenting = vrHMD !== undefined && ( vrHMD.isPresenting || ( isDeprecatedAPI && document[ fullscreenElement ] instanceof window.HTMLElement ) );
 
-		if ( wasPresenting === isPresenting ) {
-
-			return;
-
-		} else {
+		if (isPresenting) {
 
 			updateProjectionMatrices();
 			updateTranslationMatrices();
+
+		}
+
+		if ( wasPresenting === isPresenting ) {
+
+			return;
 
 		}
 
@@ -155,9 +157,6 @@ THREE.VREffect = function ( renderer, onError ) {
 				}
 
 			} else {
-
-				updateProjectionMatrices();
-				updateTranslationMatrices();
 
 				if ( canvas[ requestFullscreen ] ) {
 
