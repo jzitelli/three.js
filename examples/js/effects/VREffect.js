@@ -78,7 +78,7 @@ THREE.VREffect = function ( renderer, onError ) {
 	function onFullscreenChange () {
 
 		var wasPresenting = isPresenting;
-		isPresenting = vrHMD !== undefined && ( vrHMD.isPresenting || ( isDeprecatedAPI && document[ fullscreenElement ] instanceof window.HTMLElement ) );
+		isPresenting = vrHMD !== undefined && vrHMD.isPresenting;
 
 		if (isPresenting) {
 
