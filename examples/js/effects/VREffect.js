@@ -137,7 +137,7 @@ THREE.VREffect = function ( renderer, onError ) {
 
 				if ( boolean ) {
 
-					vrHMD.requestPresent( { source: canvas } ).then( function () {
+					vrHMD.requestPresent( [{ source: canvas }] ).then( function () {
 
 						updateProjectionMatrices();
 						updateTranslationMatrices();
@@ -152,7 +152,21 @@ THREE.VREffect = function ( renderer, onError ) {
 
 				} else {
 
-					resolve( vrHMD.exitPresent() );
+					vrHMD.exitPresent().then( function () {
+
+						var size = renderer.getSize();
+						renderer.setScissorTest( false );
+						//renderer.setScissor( renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height );
+						renderer.setViewport( 0, 0, size.width, size.height );
+						renderer.clear();
+						resolve();
+
+					} ).catch( function (error) {
+
+						console.error( 'An error occurred during exitPresent: ' + error );
+						reject( new Error( 'An error occurred during exitPresent: ' + error ) );
+
+					} );
 
 				}
 
@@ -183,6 +197,7 @@ THREE.VREffect = function ( renderer, onError ) {
 	};
 
 	this.exitPresent = function () {
+
 
 		return this.setFullScreen( false );
 
