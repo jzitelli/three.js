@@ -33,9 +33,9 @@
  *  - shadow support.
  */
 
-THREE.MMDLoader = function ( showStatus, manager ) {
+THREE.MMDLoader = function ( manager ) {
 
-	THREE.Loader.call( this, showStatus );
+	THREE.Loader.call( this );
 	this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
 	this.defaultTexturePath = './models/default/';
 
@@ -2694,15 +2694,15 @@ THREE.MMDLoader.prototype.createAnimation = function ( mesh, vmd, name ) {
 
 		}
 
-		if ( mesh.geometry.animations === undefined ) {
-
-			mesh.geometry.animations = [];
-
-		}
-
 		var clip = THREE.AnimationClip.parseAnimation( animation, mesh.geometry.bones );
 
 		if ( clip !== null ) {
+
+			if ( mesh.geometry.animations === undefined ) {
+
+				mesh.geometry.animations = [];
+
+			}
 
 			mesh.geometry.animations.push( clip );
 
@@ -2747,6 +2747,8 @@ THREE.MMDLoader.prototype.createAnimation = function ( mesh, vmd, name ) {
 
 		}
 
+		// TODO: should we use THREE.AnimationClip.CreateFromMorphTargetSequence() instead?
+
 		var tracks = [];
 
 		for ( var i = 0; i < orderedMorphs.length; i++ ) {
@@ -2767,13 +2769,13 @@ THREE.MMDLoader.prototype.createAnimation = function ( mesh, vmd, name ) {
 
 		if ( clip !== null ) {
 
-			if ( mesh.geometry.morphAnimations === undefined ) {
+			if ( mesh.geometry.animations === undefined ) {
 
-				mesh.geometry.morphAnimations = [];
+				mesh.geometry.animations = [];
 
 			}
 
-			mesh.geometry.morphAnimations.push( clip );
+			mesh.geometry.animations.push( clip );
 
 		}
 
@@ -3672,20 +3674,20 @@ THREE.ShaderLib[ 'mmd' ] = {
 		THREE.UniformsLib[ "lights" ],
 
 		{
-			"emissive" : { type: "c", value: new THREE.Color( 0x000000 ) },
-			"specular" : { type: "c", value: new THREE.Color( 0x111111 ) },
-			"shininess": { type: "f", value: 30 }
+			"emissive" : { value: new THREE.Color( 0x000000 ) },
+			"specular" : { value: new THREE.Color( 0x111111 ) },
+			"shininess": { value: 30 }
 		},
 
 		// ---- MMD specific for cel shading(outline drawing and toon mapping)
 		{
-			"outlineDrawing"  : { type: "i", value: 0 },
-			"outlineThickness": { type: "f", value: 0.0 },
-			"outlineColor"    : { type: "c", value: new THREE.Color( 0x000000 ) },
-			"outlineAlpha"    : { type: "f", value: 1.0 },
-			"celShading"      : { type: "i", value: 0 },
-			"toonMap"         : { type: "t", value: null },
-			"hasToonTexture"  : { type: "i", value: 0 }
+			"outlineDrawing"  : { value: 0 },
+			"outlineThickness": { value: 0.0 },
+			"outlineColor"    : { value: new THREE.Color( 0x000000 ) },
+			"outlineAlpha"    : { value: 1.0 },
+			"celShading"      : { value: 0 },
+			"toonMap"         : { value: null },
+			"hasToonTexture"  : { value: 0 }
 		}
 		// ---- MMD specific for cel shading(outline drawing and toon mapping)
 
@@ -4139,45 +4141,48 @@ THREE.MMDHelper.prototype = {
 
 	setAnimation: function ( mesh ) {
 
-		if ( mesh.geometry.animations !== undefined || mesh.geometry.morphAnimations !== undefined ) {
+		if ( mesh.geometry.animations !== undefined ) {
 
 			mesh.mixer = new THREE.AnimationMixer( mesh );
 
-		}
-
-		if ( mesh.geometry.animations !== undefined ) {
+			var foundAnimation = false;
+			var foundMorphAnimation = false;
 
 			for ( var i = 0; i < mesh.geometry.animations.length; i++ ) {
 
-				var action = mesh.mixer.clipAction( mesh.geometry.animations[ i ] );
+				var clip = mesh.geometry.animations[ i ];
 
-				if ( i === 0 ) {
+				var action = mesh.mixer.clipAction( clip );
 
-					action.play();
+				if ( clip.tracks[ 0 ].name.indexOf( '.morphTargetInfluences' ) === 0 ) {
+
+					if ( ! foundMorphAnimation ) {
+
+						action.play();
+						foundMorphAnimation = true;
+
+					}
+
+				} else {
+
+					if ( ! foundAnimation ) {
+
+						action.play();
+						foundAnimation = true;
+
+					}
 
 				}
 
 			}
 
-			mesh.ikSolver = new THREE.CCDIKSolver( mesh );
+			if ( foundAnimation ) {
 
-			if ( mesh.geometry.grants !== undefined ) {
+				mesh.ikSolver = new THREE.CCDIKSolver( mesh );
 
-				mesh.grantSolver = new THREE.MMDGrantSolver( mesh );
+				if ( mesh.geometry.grants !== undefined ) {
 
-			}
-
-		}
-
-		if ( mesh.geometry.morphAnimations !== undefined ) {
-
-			for ( var i = 0; i < mesh.geometry.morphAnimations.length; i++ ) {
-
-				var action = mesh.mixer.clipAction( mesh.geometry.morphAnimations[ i ] );
-
-				if ( i === 0 ) {
-
-					action.play();
+					mesh.grantSolver = new THREE.MMDGrantSolver( mesh );
 
 				}
 

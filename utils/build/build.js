@@ -19,7 +19,10 @@ function main() {
 	var args = parser.parseArgs();
 
 	var output = args.output;
-	console.log(' * Building ' + output);
+
+	console.log('Building ' + output + ':');
+	
+	var startMS = Date.now();
 
 	var sourcemap = '';
 	var sourcemapping = '';
@@ -37,6 +40,8 @@ function main() {
 	if ( args.amd ){
 		buffer.push('function ( root, factory ) {\n\n\tif ( typeof define === \'function\' && define.amd ) {\n\n\t\tdefine( [ \'exports\' ], factory );\n\n\t} else if ( typeof exports === \'object\' ) {\n\n\t\tfactory( exports );\n\n\t} else {\n\n\t\tfactory( root );\n\n\t}\n\n}( this, function ( exports ) {\n\n');
 	};
+	
+	console.log( '  Collecting source files.' );
 
 	for ( var i = 0; i < args.include.length; i ++ ){
 
@@ -75,9 +80,13 @@ function main() {
 
 	if ( !args.minify ){
 
+		console.log( '  Writing output.' );
+
 		fs.writeFileSync( output, temp, 'utf8' );
 
 	} else {
+
+		console.log( '  Uglyifying.' );
 
 		var LICENSE = "threejs.org/license";
 
@@ -124,15 +133,22 @@ function main() {
 		compressed_ast.print( stream );
 		var code = stream.toString();
 
+		console.log( '  Writing output.' );
+
 		fs.writeFileSync( output, code + sourcemapping, 'utf8' );
 
 		if ( args.sourcemaps ) {
+
+			console.log( '  Writing source map.' );
 
 			fs.writeFileSync( sourcemap, source_map.toString(), 'utf8' );
 
 		}
 
 	}
+
+	var deltaMS = Date.now() - startMS;
+	console.log( "  --- Build time: " + ( deltaMS / 1000 ) + "s" );
 
 }
 

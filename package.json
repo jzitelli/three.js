@@ -1,15 +1,37 @@
 {
-  "name": "three.js",
-  "version": "0.77.0",
+  "name": "three",
+  "version": "0.77.1",
   "description": "JavaScript 3D library",
   "main": "build/three.js",
+  "files": [
+    "package.json",
+    "LICENSE",
+    "README.md",
+    "build/three.js",
+    "build/three.min.js",
+    "src",
+    "examples/js",
+    "examples/fonts",
+    "examples/textures/perlin-512.png",
+    "examples/textures/sprite0.png",
+    "examples/textures/waternormals.jpg",
+    "examples/textures/cube/Bridge2/",
+    "examples/textures/cube/MilkyWay/",
+    "examples/textures/cube/skybox/",
+    "examples/textures/cube/SwedishRoyalCastle/",
+    "examples/textures/cube/sun_temple_stripe_stereo.jpg",
+    "examples/textures/sprites/",
+    "bower.json",
+    "utils/"
+  ],
   "directories": {
     "doc": "docs",
     "example": "examples",
     "test": "test"
   },
   "scripts": {
-    "build": "cd ./utils/build && node build.js --include common --include extras && node build.js --include common --include extras --minify --output ../../build/three.min.js",
+    "build": "cd ./utils/build && node build.js --include common --include extras",
+    "dev": "chokidar \"./src/**/*.*\" \"./utils/build/includes/*.*\" --initial -c \"npm run build\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -30,29 +52,8 @@
   "homepage": "http://threejs.org/",
   "devDependencies": {
     "argparse": "^1.0.3",
+    "chokidar-cli": "1.2.0",
     "jscs": "^1.13.1",
     "uglify-js": "^2.6.0"
-  },
-  "files": [
-    "examples/js/effects/VREffect.js",
-    "examples/js/effects/CardboardEffect.js",
-    "examples/js/controls/VRControls.js",
-    "examples/js/objects/ShadowMesh.js",
-    "examples/js/Detector.js",
-    "examples/js/ImprovedNoise.js",
-    "examples/js/WaterShader.js",
-    "examples/textures/perlin-512.png",
-    "examples/textures/sprite0.png",
-    "examples/textures/waternormals.jpg",
-    "examples/textures/cube/Bridge2/",
-    "examples/textures/cube/MilkyWay/",
-    "examples/textures/cube/skybox/",
-    "examples/textures/cube/SwedishRoyalCastle/",
-    "examples/textures/cube/sun_temple_stripe_stereo.jpg",
-    "examples/textures/sprites/",
-    "examples/fonts/",
-    "build/",
-    "src/",
-    "utils/"
-  ]
+  }
 }
