@@ -1,5 +1,5 @@
 {
-  "name": "three",
+  "name": "three.js",
   "version": "0.77.1",
   "description": "JavaScript 3D library",
   "main": "build/three.js",
