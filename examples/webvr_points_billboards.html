@@ -33,7 +33,7 @@
 	<body>
 
 		<div id="info">
-			<a href="http://threejs.org" target="_blank">three.js</a> - webgl particle billboards example
+			<a href="http://threejs.org" target="_blank">three.js</a> - webvr particle billboards example
 		</div>
 
 		<script src="../build/three.js"></script>
@@ -56,8 +56,8 @@
 			var windowHalfX = window.innerWidth / 2;
 			var windowHalfY = window.innerHeight / 2;
 
-                        var effect, controls;
-                        
+			var effect, controls;
+
 			init();
 			animate();
 
@@ -100,9 +100,9 @@
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				container.appendChild( renderer.domElement );
 
-                                effect = new THREE.VREffect( renderer );
+				effect = new THREE.VREffect( renderer );
 				controls = new THREE.VRControls( camera );
-                                                 
+
 				if ( WEBVR.isAvailable() === true ) {
 
 					document.body.appendChild( WEBVR.getButton( effect ) );
@@ -184,11 +184,6 @@
 			function render() {
 
 				var time = Date.now() * 0.00005;
-
-				camera.position.x += ( mouseX - camera.position.x ) * 0.05;
-				camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
-
-				camera.lookAt( scene.position );
 
 				h = ( 360 * ( 1.0 + time ) % 360 ) / 360;
 				material.color.setHSL( h, 0.5, 0.5 );
