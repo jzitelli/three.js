@@ -60,7 +60,7 @@
 		uniform mat4 modelViewMatrix;
 		uniform mat4 projectionMatrix;
 		uniform float time;
-
+		uniform mat3 rotMatrix;
 		attribute vec3 position;
 		attribute vec2 uv;
 		attribute vec3 translate;
@@ -70,12 +70,15 @@
 
 		void main() {
 
-			vec4 mvPosition = modelViewMatrix * vec4( translate, 1.0 );
-			vec3 trTime = vec3(translate.x + time,translate.y + time,translate.z + time);
+			// mat3 rot = mat3(modelViewMatrix[0].xyz, modelViewMatrix[1].xyz, modelViewMatrix[2].xyz);
 			float scale = 0.002; //sin( trTime.x * 2.1 ) + sin( trTime.y * 3.2 ) + sin( trTime.z * 4.3 );
 			vScale = scale;
 			scale = scale * 5.0 + 5.0;
-			mvPosition.xyz += position * scale;
+			// vec4 mvPosition = modelViewMatrix * vec4( translate, 1.0 );
+			vec4 mvPosition = vec4( scale * rotMatrix * position, 1.0);
+			// vec3 trTime = vec3(translate.x + time,translate.y + time,translate.z + time);
+			// mvPosition.xyz += position * scale;
+			mvPosition += modelViewMatrix * vec4( translate, 1.0);
 			vUv = uv;
 			gl_Position = projectionMatrix * mvPosition;
 
