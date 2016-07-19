@@ -78,23 +78,13 @@ THREE.VRControls = function ( object, onError ) {
 
 	};
 
-	this.update = function ( useImmediatePose ) {
+	this.update = function () {
 
 		if ( vrDisplay ) {
 
 			if ( vrDisplay.getPose ) {
 
-				var pose;
-
-				if ( useImmediatePose && vrInput.getImmediatePose ) {
-
-					pose = vrInput.getImmediatePose();
-
-				} else {
-
-					pose = vrInput.getPose();
-
-				}
+				var pose = vrDisplay.getPose();
 
 				if ( pose.orientation !== null ) {
 
