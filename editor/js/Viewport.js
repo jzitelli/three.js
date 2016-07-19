@@ -12,10 +12,27 @@ var Viewport = function ( editor ) {
 
 	container.add( new Viewport.Info( editor ) );
 
+	//
+
+	var renderer = null;
+
+	var camera = editor.camera;
 	var scene = editor.scene;
 	var sceneHelpers = editor.sceneHelpers;
 
 	var objects = [];
+
+	//
+
+	var vrEffect, vrControls;
+
+	if ( WEBVR.isAvailable() === true ) {
+
+		var vrCamera = new THREE.PerspectiveCamera();
+		vrCamera.projectionMatrix = camera.projectionMatrix;
+		camera.add( vrCamera );
+
+	}
 
 	// helpers
 
@@ -24,9 +41,7 @@ var Viewport = function ( editor ) {
 
 	//
 
-	var camera = editor.camera;
-
-	//
+	var box = new THREE.Box3();
 
 	var selectionBox = new THREE.BoxHelper();
 	selectionBox.material.depthTest = false;
@@ -276,6 +291,12 @@ var Viewport = function ( editor ) {
 
 	} );
 
+	signals.enterVR.add( function () {
+
+		vrEffect.isPresenting ? vrEffect.exitPresent() : vrEffect.requestPresent();
+
+	} );
+
 	var clearColor;
 
 	signals.themeChanged.add( function ( value ) {
@@ -339,6 +360,19 @@ var Viewport = function ( editor ) {
 
 		container.dom.appendChild( renderer.domElement );
 
+		if ( WEBVR.isAvailable() === true ) {
+
+			vrControls = new THREE.VRControls( vrCamera );
+			vrEffect = new THREE.VREffect( renderer );
+
+			window.addEventListener( 'vrdisplaypresentchange', function ( event ) {
+
+				effect.isPresenting ? signals.enteredVR.dispatch() : signals.exitedVR.dispatch();
+
+			}, false );
+
+		}
+
 		render();
 
 	} );
@@ -364,9 +398,11 @@ var Viewport = function ( editor ) {
 
 		if ( object !== null ) {
 
-			if ( object.geometry !== undefined ) {
+			box.setFromObject( object );
 
-				selectionBox.update( object );
+			if ( box.isEmpty() === false ) {
+
+				selectionBox.update( box );
 				selectionBox.visible = true;
 
 			}
@@ -533,12 +569,6 @@ var Viewport = function ( editor ) {
 
 	//
 
-	var renderer = null;
-
-	animate();
-
-	//
-
 	function updateFog( root ) {
 
 		if ( root.fog ) {
@@ -577,11 +607,14 @@ var Viewport = function ( editor ) {
 
 			}
 
+		}
+		*/
+
+		if ( vrEffect && vrEffect.isPresenting ) {
+
 			render();
 
 		}
-
-		*/
 
 	}
 
@@ -590,16 +623,33 @@ var Viewport = function ( editor ) {
 		sceneHelpers.updateMatrixWorld();
 		scene.updateMatrixWorld();
 
-		renderer.clear();
-		renderer.render( scene, camera );
+		if ( vrEffect && vrEffect.isPresenting ) {
 
-		if ( renderer instanceof THREE.RaytracingRenderer === false ) {
+			vrControls.update();
 
-			renderer.render( sceneHelpers, camera );
+			camera.updateMatrixWorld();
+			renderer.clear();
+
+			vrEffect.render( scene, vrCamera );
+			vrEffect.render( sceneHelpers, vrCamera );
+
+		} else {
+
+			renderer.clear();
+			renderer.render( scene, camera );
+
+			if ( renderer instanceof THREE.RaytracingRenderer === false ) {
+
+				renderer.render( sceneHelpers, camera );
+
+			}
 
 		}
 
+
 	}
+
+	requestAnimationFrame( animate );
 
 	return container;
 

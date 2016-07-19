@@ -1,6 +1,6 @@
 {
   "name": "three.js",
-  "version": "0.78.0",
+  "version": "0.79.0",
   "description": "JavaScript 3D library",
   "main": "build/three.js",
   "files": [
@@ -39,7 +39,8 @@
     "test": "test"
   },
   "scripts": {
-    "build": "cd ./utils/build && node build.js --include common --include extras",
+    "build": "node utils/build/build.js --include common --include extras",
+    "build-min": "node utils/build/build.js --include common --include extras --minify",
     "dev": "chokidar \"./src/**/*.*\" \"./utils/build/includes/*.*\" --initial -c \"npm run build\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

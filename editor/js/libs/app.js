@@ -11,7 +11,7 @@ var APP = {
 		var loader = new THREE.ObjectLoader();
 		var camera, scene, renderer;
 
-		var vr, controls, effect;
+		var controls, effect, cameraVR, isVR;
 
 		var events = {};
 
@@ -22,11 +22,14 @@ var APP = {
 
 		this.load = function ( json ) {
 
-			vr = json.project.vr;
+			isVR = json.project.vr;
 
 			renderer = new THREE.WebGLRenderer( { antialias: true } );
 			renderer.setClearColor( 0x000000 );
 			renderer.setPixelRatio( window.devicePixelRatio );
+
+			if ( json.project.gammaInput ) renderer.gammaInput = true;
+			if ( json.project.gammaOutput ) renderer.gammaOutput = true;
 
 			if ( json.project.shadows ) {
 
@@ -115,22 +118,13 @@ var APP = {
 			camera.aspect = this.width / this.height;
 			camera.updateProjectionMatrix();
 
-			if ( vr === true ) {
+			if ( isVR === true ) {
 
-				if ( camera.parent === null ) {
+				cameraVR = new THREE.PerspectiveCamera();
+				cameraVR.projectionMatrix = camera.projectionMatrix;
+				camera.add( cameraVR );
 
-					// camera needs to be in the scene so camera2 matrix updates
-
-					scene.add( camera );
-
-				}
-
-				var camera2 = camera.clone();
-				camera.add( camera2 );
-
-				camera = camera2;
-
-				controls = new THREE.VRControls( camera );
+				controls = new THREE.VRControls( cameraVR );
 				effect = new THREE.VREffect( renderer );
 
 				if ( WEBVR.isAvailable() === true ) {
@@ -157,15 +151,21 @@ var APP = {
 
 		this.setSize = function ( width, height ) {
 
-			if ( renderer._fullScreen ) return;
-
 			this.width = width;
 			this.height = height;
 
-			camera.aspect = this.width / this.height;
-			camera.updateProjectionMatrix();
+			if ( camera ) {
 
-			renderer.setSize( width, height );
+				camera.aspect = this.width / this.height;
+				camera.updateProjectionMatrix();
+
+			}
+
+			if ( renderer ) {
+
+				renderer.setSize( width, height );
+
+			}
 
 		};
 
@@ -195,10 +195,12 @@ var APP = {
 
 			}
 
-			if ( vr === true ) {
+			if ( isVR === true ) {
+
+				camera.updateMatrixWorld();
 
 				controls.update();
-				effect.render( scene, camera );
+				effect.render( scene, cameraVR );
 
 			} else {
 
@@ -254,6 +256,10 @@ var APP = {
 			}
 
 			renderer.dispose();
+
+			camera = undefined;
+			scene = undefined;
+			renderer = undefined;
 
 		};
 
