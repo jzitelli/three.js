@@ -340,9 +340,9 @@ THREE.VREffect = function ( renderer, onError ) {
 
     }
 
-    function updateTranslationMatrices( scale ) {
+    function updateTranslationMatrices() {
 
-        scale = scale || 1;
+        var scale = scope.scale;
 
         var eyeParamsL = vrDisplay.getEyeParameters( 'left' );
         var eyeParamsR = vrDisplay.getEyeParameters( 'right' );
