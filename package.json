@@ -4,7 +4,6 @@
   "description": "JavaScript 3D library",
   "main": "build/three.js",
   "files": [
-    "package.json",
     "LICENSE",
     "README.md",
     "build/three.js",
@@ -23,15 +22,13 @@
     "examples/textures/brick_bump.jpg",
     "examples/textures/brick_diffuse.jpg",
     "examples/textures/brick_roughness.jpg",
-    "examples/textures/cube/Bridge2/",
-    "examples/textures/cube/MilkyWay/",
     "examples/textures/cube/skybox/",
     "examples/textures/cube/SwedishRoyalCastle/",
     "examples/textures/cube/sun_temple_stripe_stereo.jpg",
     "examples/textures/sprites/",
     "examples/models/obj/",
-    "bower.json",
-    "utils/"
+    "utils/",
+    "rollup.config.js"
   ],
   "directories": {
     "doc": "docs",
