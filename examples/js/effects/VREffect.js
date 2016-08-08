@@ -303,9 +303,11 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	var cameraL = new THREE.PerspectiveCamera();
 	cameraL.layers.enable( 1 );
+	cameraL.matrixAutoUpdate = true;
 
 	var cameraR = new THREE.PerspectiveCamera();
 	cameraR.layers.enable( 2 );
+	cameraR.matrixAutoUpdate = true;
 
 	this.render = function ( scene, camera, renderTarget, forceClear ) {
 
@@ -370,7 +372,7 @@ THREE.VREffect = function ( renderer, onError ) {
 			} else  {
 
 				renderer.setScissorTest( true );
-			
+
 			}
 
 			if ( renderer.autoClear || forceClear ) renderer.clear();
@@ -424,11 +426,11 @@ THREE.VREffect = function ( renderer, onError ) {
 				renderer.setRenderTarget( null );
 
 			} else {
-				
+
 				renderer.setScissorTest( false );
 
 			}
-			
+
 			if ( autoUpdate ) {
 
 				scene.autoUpdate = true;
