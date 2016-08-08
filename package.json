@@ -1,5 +1,5 @@
 {
-  "name": "three.js",
+  "name": "three",
   "version": "0.79.0",
   "description": "JavaScript 3D library",
   "main": "build/three.js",
@@ -22,12 +22,11 @@
     "examples/textures/brick_bump.jpg",
     "examples/textures/brick_diffuse.jpg",
     "examples/textures/brick_roughness.jpg",
-    "examples/textures/cube/skybox/",
-    "examples/textures/cube/SwedishRoyalCastle/",
+    "examples/textures/cube/skybox",
     "examples/textures/cube/sun_temple_stripe_stereo.jpg",
-    "examples/textures/sprites/",
-    "examples/models/obj/",
-    "utils/",
+    "examples/textures/sprites",
+    "examples/models/obj/vive-controller",
+    "utils/build",
     "rollup.config.js"
   ],
   "directories": {
