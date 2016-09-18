@@ -283,6 +283,7 @@ THREE.VREffect = function ( renderer, onError ) {
 
 			} else  {
 
+				renderer.setRenderTarget( null );
 				renderer.setScissorTest( true );
 
 			}
