@@ -111,7 +111,7 @@ Box3.prototype = {
 
 				if ( geometry !== undefined ) {
 
-					if ( (geometry && geometry.isGeometry) ) {
+					if ( geometry.isGeometry ) {
 
 						var vertices = geometry.vertices;
 
@@ -124,7 +124,7 @@ Box3.prototype = {
 
 						}
 
-					} else if ( (geometry && geometry.isBufferGeometry) ) {
+					} else if ( geometry.isBufferGeometry ) {
 
 						var attribute = geometry.attributes.position;
 
@@ -132,7 +132,7 @@ Box3.prototype = {
 
 							var array, offset, stride;
 
-							if ( (attribute && attribute.isInterleavedBufferAttribute) ) {
+							if ( attribute.isInterleavedBufferAttribute ) {
 
 								array = attribute.data.array;
 								offset = attribute.offset;
@@ -396,7 +396,7 @@ Box3.prototype = {
 
 			this.getCenter( result.center );
 
-			result.radius = this.size( v1 ).length() * 0.5;
+			result.radius = this.getSize( v1 ).length() * 0.5;
 
 			return result;
 
