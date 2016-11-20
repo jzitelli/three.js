@@ -59,13 +59,23 @@ var list = {
 			[ "BufferAttribute", "api/core/BufferAttribute" ],
 			[ "BufferGeometry", "api/core/BufferGeometry" ],
 			[ "Clock", "api/core/Clock" ],
+			[ "DirectGeometry", "api/core/DirectGeometry" ],
 			[ "EventDispatcher", "api/core/EventDispatcher" ],
 			[ "Face3", "api/core/Face3" ],
 			[ "Geometry", "api/core/Geometry" ],
+			[ "InstancedBufferAttribute", "api/core/InstancedBufferAttribute" ],
+			[ "InstancedBufferGeometry", "api/core/InstancedBufferGeometry" ],
+			[ "InstancedInterleavedBuffer", "api/core/InstancedInterleavedBuffer" ],
+			[ "InterleavedBuffer", "api/core/InterleavedBuffer" ],
+			[ "InterleavedBufferAttribute", "api/core/InterleavedBufferAttribute" ],
 			[ "Layers", "api/core/Layers" ],
 			[ "Object3D", "api/core/Object3D" ],
 			[ "Raycaster", "api/core/Raycaster" ],
 			[ "Uniform", "api/core/Uniform"]
+		],
+
+		"Core / BufferAttributes": [
+			[ "BufferAttribute Types", "api/core/bufferAttributeTypes/BufferAttributeTypes" ]
 		],
 
 		"Deprecated": [
@@ -83,13 +93,13 @@ var list = {
 			[ "CurvePath", "api/extras/core/CurvePath" ],
 			[ "Font", "api/extras/core/Font" ],
 			[ "Path", "api/extras/core/Path" ],
-			[ "Shape", "api/extras/core/Shape" ]
+			[ "Shape", "api/extras/core/Shape" ],
+			[ "ShapePath", "api/extras/core/ShapePath" ]
 		],
 
 		"Extras / Curves": [
 			[ "ArcCurve", "api/extras/curves/ArcCurve" ],
 			[ "CatmullRomCurve3", "api/extras/curves/CatmullRomCurve3" ],
-			[ "ClosedSplineCurve3", "api/extras/curves/ClosedSplineCurve3" ],
 			[ "CubicBezierCurve", "api/extras/curves/CubicBezierCurve" ],
 			[ "CubicBezierCurve3", "api/extras/curves/CubicBezierCurve3" ],
 			[ "EllipseCurve", "api/extras/curves/EllipseCurve" ],
@@ -112,6 +122,7 @@ var list = {
 			[ "GridHelper", "api/extras/helpers/GridHelper" ],
 			[ "HemisphereLightHelper", "api/extras/helpers/HemisphereLightHelper" ],
 			[ "PointLightHelper", "api/extras/helpers/PointLightHelper" ],
+			[ "RectAreaLightHelper", "api/extras/helpers/RectAreaLightHelper" ],
 			[ "SkeletonHelper", "api/extras/helpers/SkeletonHelper" ],
 			[ "SpotLightHelper", "api/extras/helpers/SpotLightHelper" ],
 			[ "VertexNormalsHelper", "api/extras/helpers/VertexNormalsHelper" ]
@@ -196,7 +207,7 @@ var list = {
 			[ "Loader", "api/loaders/Loader" ],
 			[ "MaterialLoader", "api/loaders/MaterialLoader" ],
 			[ "ObjectLoader", "api/loaders/ObjectLoader" ],
-			[ "TextureLoader", "api/loaders/TextureLoader" ],
+			[ "TextureLoader", "api/loaders/TextureLoader" ]
 		],
 
 		"Loaders / Managers": [
@@ -343,7 +354,7 @@ var list = {
 			[ "CanvasRenderer", "examples/renderers/CanvasRenderer" ]
 		]
 
-	},
+	}
 
 };
 

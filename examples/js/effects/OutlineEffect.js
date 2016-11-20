@@ -64,6 +64,7 @@ THREE.OutlineEffect = function ( renderer, parameters ) {
 		MeshBasicMaterial: 'basic',
 		MeshLambertMaterial: 'lambert',
 		MeshPhongMaterial: 'phong',
+		MeshToonMaterial: 'toon',
 		MeshStandardMaterial: 'physical',
 		MeshPhysicalMaterial: 'physical'
 	};
@@ -87,13 +88,13 @@ THREE.OutlineEffect = function ( renderer, parameters ) {
 		"	vec4 norm = normalize( pos - pos2 );",
 		"	return pos + norm * thickness * pos.w * ratio;",
 
-		"}",
+		"}"
 
 	].join( "\n" );
 
 	var vertexShaderChunk2 = [
 
-		"#if ! defined( LAMBERT ) && ! defined( PHONG ) && ! defined( PHYSICAL )",
+		"#if ! defined( LAMBERT ) && ! defined( PHONG ) && ! defined( TOON ) && ! defined( PHYSICAL )",
 
 		"	#ifndef USE_ENVMAP",
 		"		vec3 objectNormal = normalize( normal );",
@@ -110,7 +111,7 @@ THREE.OutlineEffect = function ( renderer, parameters ) {
 		"	gl_Position = calculateOutline( gl_Position, objectNormal, skinned );",
 		"#else",
 		"	gl_Position = calculateOutline( gl_Position, objectNormal, vec4( transformed, 1.0 ) );",
-		"#endif",
+		"#endif"
 
 	].join( "\n" );
 
@@ -128,7 +129,7 @@ THREE.OutlineEffect = function ( renderer, parameters ) {
 
 		"	#include <fog_fragment>",
 
-		"}",
+		"}"
 
 	].join( "\n" );
 
@@ -256,11 +257,11 @@ THREE.OutlineEffect = function ( renderer, parameters ) {
 
 		if ( object.material === undefined ) return;
 
-		var originalMaterial = originalMaterials[ object.material.uuid ]
+		var originalMaterial = originalMaterials[ object.material.uuid ];
 
 		if ( originalMaterial === undefined ) {
 
-			originalMaterial = originalMaterials[ object.uuid ]
+			originalMaterial = originalMaterials[ object.uuid ];
 
 			if ( originalMaterial === undefined ) return;
 
