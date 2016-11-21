@@ -278,7 +278,8 @@ var files = {
 		"webvr_vive",
 		"webvr_vive_dragging",
 		"webvr_vive_paint",
-		"webvr_vive_sculpt"
+		"webvr_vive_sculpt",
+		"webvr_buffergeometry_instancing_billboards"
 	],
 	"css3d": [
 		"css3d_molecules",
