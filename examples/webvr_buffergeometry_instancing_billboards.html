@@ -80,7 +80,7 @@
 			vec3 z = normalize(-mvPosition.xyz);
 			vec3 x = normalize(vec3(z.z, 0.0, -z.x));
 			vec3 y = cross(z, x);
-			mvPosition.xyz += mat3(x, y, z) * position * scale;
+			mvPosition.xyz += scale * (position.x * x + position.y * y + position.z * z);
 			vUv = uv;
 			gl_Position = projectionMatrix * mvPosition;
 
@@ -220,6 +220,7 @@
 
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.y = 0.5;
+			mesh.frustumCulled = false;
 			//mesh.scale.set( 5, 5, 5 );
 			scene.add( mesh );
 
