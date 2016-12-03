@@ -86,18 +86,7 @@ export { InterleavedBufferAttribute } from './core/InterleavedBufferAttribute.js
 export { InstancedInterleavedBuffer } from './core/InstancedInterleavedBuffer.js';
 export { InterleavedBuffer } from './core/InterleavedBuffer.js';
 export { InstancedBufferAttribute } from './core/InstancedBufferAttribute.js';
-export {
-	Float64BufferAttribute,
-	Float32BufferAttribute,
-	Uint32BufferAttribute,
-	Int32BufferAttribute,
-	Uint16BufferAttribute,
-	Int16BufferAttribute,
-	Uint8ClampedBufferAttribute,
-	Uint8BufferAttribute,
-	Int8BufferAttribute,
-	BufferAttribute
-} from './core/BufferAttribute.js';
+export * from './core/BufferAttribute.js';
 export { Face3 } from './core/Face3.js';
 export { Object3D } from './core/Object3D.js';
 export { Raycaster } from './core/Raycaster.js';
@@ -113,6 +102,7 @@ export { Triangle } from './math/Triangle.js';
 export { Spline } from './math/Spline.js';
 export { _Math as Math } from './math/Math.js';
 export { Spherical } from './math/Spherical.js';
+export { Cylindrical } from './math/Cylindrical.js';
 export { Plane } from './math/Plane.js';
 export { Frustum } from './math/Frustum.js';
 export { Sphere } from './math/Sphere.js';
@@ -137,10 +127,10 @@ export { PointLightHelper } from './extras/helpers/PointLightHelper.js';
 export { RectAreaLightHelper } from './extras/helpers/RectAreaLightHelper.js';
 export { HemisphereLightHelper } from './extras/helpers/HemisphereLightHelper.js';
 export { GridHelper } from './extras/helpers/GridHelper.js';
+export { PolarGridHelper } from './extras/helpers/PolarGridHelper.js';
 export { FaceNormalsHelper } from './extras/helpers/FaceNormalsHelper.js';
 export { DirectionalLightHelper } from './extras/helpers/DirectionalLightHelper.js';
 export { CameraHelper } from './extras/helpers/CameraHelper.js';
-export { BoundingBoxHelper } from './extras/helpers/BoundingBoxHelper.js';
 export { BoxHelper } from './extras/helpers/BoxHelper.js';
 export { ArrowHelper } from './extras/helpers/ArrowHelper.js';
 export { AxisHelper } from './extras/helpers/AxisHelper.js';
