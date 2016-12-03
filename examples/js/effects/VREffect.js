@@ -232,6 +232,8 @@ THREE.VREffect = function( renderer, onError ) {
 	cameraR.layers.enable( 2 );
 	cameraR.matrixAutoUpdate = true;
 
+	var _viewMatrix = new THREE.Matrix4();
+
 	this.render = function( scene, camera, renderTarget, forceClear ) {
 
 		if ( vrDisplay && scope.isPresenting ) {
@@ -321,6 +323,11 @@ THREE.VREffect = function( renderer, onError ) {
 				vrDisplay.depthFar = camera.far;
 
 				vrDisplay.getFrameData( frameData );
+
+				_viewMatrix.elements = frameData.leftViewMatrix;
+				cameraL.matrixWorld.getInverse( _viewMatrix );
+				_viewMatrix.elements = frameData.rightViewMatrix;
+				cameraR.matrixWorld.getInverse( _viewMatrix );
 
 				cameraL.projectionMatrix.elements = frameData.leftProjectionMatrix;
 				cameraR.projectionMatrix.elements = frameData.rightProjectionMatrix;
